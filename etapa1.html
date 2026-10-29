@@ -1,0 +1,502 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>EMBA Game — Etapa 1: Ventaja Competitiva y Diferenciación</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    background: #0a0f1d;
+    color: #e2e8f0;
+    font-family: 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  .header {
+    width: 100%;
+    max-width: 960px;
+    padding: 28px 20px 10px;
+    text-align: center;
+  }
+  .header h1 {
+    font-size: 1.4rem;
+    font-weight: 600;
+    letter-spacing: 1px;
+  }
+  .header .subtitle {
+    color: #00f2fe;
+    font-size: 0.85rem;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin-top: 6px;
+  }
+  .kpis {
+    width: 100%;
+    max-width: 960px;
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+    padding: 14px 20px 22px;
+  }
+  .kpi {
+    background: #161f38;
+    border: 1px solid #232f52;
+    border-radius: 12px;
+    padding: 14px 10px;
+    text-align: center;
+    transition: border-color .3s;
+  }
+  .kpi.low { border-color: #ef4444; }
+  .kpi .label { font-size: 0.72rem; color: #94a3b8; margin-bottom: 6px; }
+  .kpi .value { font-size: 1.5rem; font-weight: 700; color: #00f2fe; }
+  .kpi.low .value { color: #ef4444; }
+  .screen {
+    width: 100%;
+    max-width: 960px;
+    padding: 0 20px 40px;
+  }
+  .card {
+    background: #161f38;
+    border: 1px solid #232f52;
+    border-radius: 16px;
+    padding: 28px;
+    margin-bottom: 18px;
+  }
+  .dilemma-tag {
+    display: inline-block;
+    background: rgba(0,242,254,.1);
+    color: #00f2fe;
+    border: 1px solid rgba(0,242,254,.4);
+    border-radius: 999px;
+    padding: 4px 14px;
+    font-size: 0.75rem;
+    letter-spacing: 1px;
+    margin-bottom: 16px;
+  }
+  .narrative {
+    font-size: 1rem;
+    line-height: 1.7;
+    color: #e2e8f0;
+    margin-bottom: 22px;
+  }
+  .options { display: flex; flex-direction: column; gap: 14px; }
+  .option {
+    background: #0f1730;
+    border: 1px solid #2b3a63;
+    border-radius: 12px;
+    padding: 18px 20px;
+    text-align: left;
+    color: #e2e8f0;
+    font-size: 0.95rem;
+    line-height: 1.55;
+    cursor: pointer;
+    transition: border-color .2s, transform .15s, background .2s;
+    font-family: inherit;
+  }
+  .option:hover {
+    border-color: #00f2fe;
+    transform: translateY(-2px);
+    background: #111c3a;
+  }
+  .options.hidden, .card.hidden { display: none; }
+  .modal-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(4,8,20,.75);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    z-index: 50;
+  }
+  .modal {
+    background: #161f38;
+    border: 1px solid #00f2fe;
+    border-radius: 16px;
+    max-width: 560px;
+    width: 100%;
+    padding: 26px;
+    box-shadow: 0 0 40px rgba(0,242,254,.25);
+  }
+  .modal h3 {
+    color: #00f2fe;
+    margin-bottom: 12px;
+    font-size: 1.05rem;
+    letter-spacing: .5px;
+  }
+  .modal p { line-height: 1.65; font-size: .93rem; margin-bottom: 10px; }
+  .impacts { margin: 14px 0; display: flex; flex-wrap: wrap; gap: 8px; }
+  .impact {
+    border-radius: 999px;
+    padding: 5px 12px;
+    font-size: .8rem;
+    font-weight: 600;
+    border: 1px solid;
+  }
+  .impact.up { color: #22c55e; border-color: rgba(34,197,94,.5); background: rgba(34,197,94,.08); }
+  .impact.down { color: #ef4444; border-color: rgba(239,68,68,.5); background: rgba(239,68,68,.08); }
+  .modal button {
+    margin-top: 8px;
+    background: #00f2fe;
+    color: #0a0f1d;
+    border: none;
+    border-radius: 10px;
+    padding: 12px 22px;
+    font-weight: 700;
+    font-size: .9rem;
+    cursor: pointer;
+    font-family: inherit;
+  }
+  .modal button:hover { background: #6ff7ff; }
+  .result-title {
+    font-size: 2rem;
+    font-weight: 800;
+    text-align: center;
+    margin-bottom: 18px;
+    letter-spacing: 1px;
+  }
+  .result-title.win { color: #22c55e; text-shadow: 0 0 24px rgba(34,197,94,.4); }
+  .result-title.lose { color: #ef4444; text-shadow: 0 0 24px rgba(239,68,68,.4); }
+  .lessons { list-style: none; margin: 14px 0 4px; }
+  .lessons li {
+    padding: 10px 0 10px 26px;
+    position: relative;
+    line-height: 1.6;
+    font-size: .93rem;
+    border-bottom: 1px solid #232f52;
+  }
+  .lessons li::before {
+    content: '✓';
+    position: absolute;
+    left: 0;
+    color: #00f2fe;
+    font-weight: 700;
+  }
+  .final-kpis {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 10px;
+    margin: 18px 0;
+  }
+  .btn-main {
+    display: block;
+    margin: 22px auto 0;
+    background: #00f2fe;
+    color: #0a0f1d;
+    border: none;
+    border-radius: 12px;
+    padding: 14px 30px;
+    font-weight: 700;
+    font-size: 1rem;
+    cursor: pointer;
+    font-family: inherit;
+    transition: background .2s;
+  }
+  .btn-main:hover { background: #6ff7ff; }
+  .status-line {
+    text-align: center;
+    color: #94a3b8;
+    font-size: .8rem;
+    margin-top: 12px;
+    min-height: 1.2em;
+  }
+  @media (max-width: 640px) {
+    .kpis, .final-kpis { grid-template-columns: repeat(2, 1fr); }
+    .header h1 { font-size: 1.1rem; }
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1 id="stage-title">Etapa 1 — Ventaja Competitiva de Porter y Diferenciación</h1>
+  <div class="subtitle">Sector: Fintech de Microcréditos · Contexto: Fuerte regulación estatal y subida de tipos</div>
+</div>
+
+<div class="kpis" id="kpis-panel">
+  <div class="kpi" id="kpi-finanzas">
+    <div class="label">💰 Finanzas</div>
+    <div class="value" id="val-finanzas">50%</div>
+  </div>
+  <div class="kpi" id="kpi-operaciones">
+    <div class="label">⚙️ Operaciones</div>
+    <div class="value" id="val-operaciones">50%</div>
+  </div>
+  <div class="kpi" id="kpi-talento">
+    <div class="label">👥 Capital Humano</div>
+    <div class="value" id="val-talento">50%</div>
+  </div>
+  <div class="kpi" id="kpi-mercado">
+    <div class="label">📈 Mercado y Reputación</div>
+    <div class="value" id="val-mercado">50%</div>
+  </div>
+</div>
+
+<div class="screen">
+  <div id="screen-game">
+    <div class="card" id="dilemma-card">
+      <span class="dilemma-tag" id="dilemma-tag">Dilema 1 de 3</span>
+      <p class="narrative" id="dilemma-narrative"></p>
+      <div class="options" id="options-container"></div>
+    </div>
+  </div>
+
+  <div id="screen-result" style="display:none;">
+    <div class="card">
+      <div class="result-title" id="result-title"></div>
+      <p class="narrative" id="result-message"></p>
+      <div class="final-kpis" id="final-kpis"></div>
+      <ul class="lessons" id="result-lessons"></ul>
+      <button class="btn-main" id="btn-return">Regresar al Mapa de Ruta</button>
+      <div class="status-line" id="sync-status"></div>
+    </div>
+  </div>
+</div>
+
+<div class="modal-backdrop" id="modal-backdrop" style="display:none;">
+  <div class="modal">
+    <h3 id="modal-title">Consecuencias de tu decisión</h3>
+    <p id="modal-feedback"></p>
+    <div class="impacts" id="modal-impacts"></div>
+    <button id="modal-btn">Continuar</button>
+  </div>
+</div>
+
+<script>
+/* ============================================================
+   CONFIGURACIÓN DE LA ETAPA (modificar solo este bloque por nivel)
+   ============================================================ */
+const CONFIG_ETAPA = {
+  numeroEtapa: 1,
+  temaAcademico: 'Ventaja Competitiva de Porter y Diferenciación',
+  sector: 'Fintech de Microcréditos',
+  contextoMacro: 'Fuerte regulación estatal y subida de tipos',
+  eventoDetonante: 'Un competidor tradicional lanza una app copia con comisiones a tasa cero',
+  dilemas: [
+    {
+      narrativa: 'Tu fintech de microcréditos "Creditia" ha crecido con un modelo de scoring propietario y atención hiperpersonalizada. Hoy, el banco tradicional "BancoSol" lanzó una app idéntica a la tuya con comisiones a tasa cero, financiada con el colchón de capital de su negocio bancario clásico. En el comité ejecutivo, tu CFO propone igualar la tasa cero para no perder clientes este trimestre.',
+      opciones: [
+        {
+          texto: 'Igualar la tasa cero y competir en precio, absorbiendo pérdidas con capital de inversores mientras dure la guerra de precios.',
+          feedback: 'Acabas de iniciar una guerra de precios contra un competidor con un bolsillo estructuralmente más grande. Según Porter, competir en precio te arrastra a la trampa de la “no diferenciación”: destruyes tu margen (Finanzas), sobrecargas a tu equipo redefiniendo procesos a toda velocidad (Operaciones y Talento) y, a medio plazo, el mercado deja de percibir tu propuesta de valor única (Mercado).',
+          impactos: { finanzas: -22, operaciones: -10, talento: -8, mercado: -5 }
+        },
+        {
+          texto: 'Rechazar la guerra de precios y reforzar la diferenciación: narrar públicamente tu ventaja competitiva (aprobación en minutos, modelado de riesgo exclusivo) y lanzar un programa premium para tus mejores clientes.',
+          feedback: 'Decisión alineada con la Estrategia Genérica de Diferenciación de Porter. Al no perseguir al líder en precio, evitas erosionar márgenes y posicionas tu propuesta de valor como única en el sector, blindando a tus clientes de la app copiada. Requiere inversión en producto y marca, pero protege la sostenibilidad del modelo.',
+          impactos: { finanzas: +5, operaciones: -5, talento: +5, mercado: +15 }
+        }
+      ]
+    },
+    {
+      narrativa: 'El regulador, presionado por la subida de tipos, anuncia que los microcréditos tendrán un tope de interés y auditorías trimestrales de usura. Dos de tus rivales ya redujeron su plantilla de analistas de riesgo para compensar margen. Tu COO te pregunta si automatizas el 100% del análisis de riesgo para recortar costes, o si rediseñas el proceso con una arquitectura híbrida humano-IA auditable.',
+      opciones: [
+        {
+          texto: 'Automatizar el 100% del análisis de riesgo: máxima eficiencia, mínimos costes operativos y despidos selectivos en el equipo de analistas.',
+          feedback: 'La automatización total reduce costes a corto plazo (Finanzas y Operaciones suben), pero el microcrédito opera en segmentos con datos escasos donde el criterio humano es un activo estratégico: la calidad crediticia se deteriora de forma invisible y el talento clave, viendo despidos, se desvincula emocionalmente. El coste reputacional y de riesgo latente golpea a medio plazo.',
+          impactos: { finanzas: +12, operaciones: +12, talento: -20, mercado: -10 }
+        },
+        {
+          texto: 'Arquitectura híbrida humano-IA: la IA pre-clasifica y los analistas validan los casos límite, con un expediente auditable para el regulador.',
+          feedback: 'Alineas eficiencia operativa con la cadena de valor que te diferencia: el riesgo se controla mejor (Operaciones), el regulador percibe cumplimiento proactivo (Mercado) y tu talento clave evoluciona hacia roles de mayor valor en vez de extinguirse (Talento). El despliegue tecnológico tiene un coste puntual en Finanzas.',
+          impactos: { finanzas: -8, operaciones: +10, talento: +15, mercado: +12 }
+        }
+      ]
+    },
+    {
+      narrativa: 'Con la regulación ya en vigor, BancoSol compra una fintech pequeña y ofrece tasas cero solo a los clientes que tú consideras tu núcleo: pequeños comerciantes urbanos. En paralelo, un fondo de inversión te ofrece capital fresco con una condición dura: triplicar la originación de créditos en 12 meses aunque el riesgo crezca. Tu equipo directivo está dividido entre aceptar el capital o profundizar en un nicho desatendido.',
+      opciones: [
+        {
+          texto: 'Aceptar el capital del fondo y triplicar la originación, relajando los umbrales de crédito para capturar volumen antes de que BancoSol se consolide.',
+          feedback: 'El crecimiento apalancado sin actividad distintiva es el error clásico que Porter describiría como "eficiencia operativa confundida con estrategia": persigues volumen, no rentabilidad. El deterioro de la calidad crediticia en una fase de tipos altos castigará Finanzas, saturará Operaciones y quemará a tu Talento. Solo el Mercado registra una ganancia cosmética de cuota.',
+          impactos: { finanzas: -15, operaciones: -12, talento: -10, mercado: +15 }
+        },
+        {
+          texto: 'Rechazar el capital y especializarte en un nicho desatendido (microemprendedoras rurales con garantías comunitarias), donde BancoSol no tiene presencia ni coste de estructura.',
+          feedback: 'Estrategia de foco y nicho en su expresión más pura: eliges deliberadamente dónde competir y dónde no. La especialización en un segmento defendible genera lealtad, barrares de entrada para el competidor tradicional y un modelo de riesgo único que el regulador valora. El coste de desarrollar el nuevo canal pesa puntualmente en Finanzas, pero construye una posición sostenible.',
+          impactos: { finanzas: -10, operaciones: +5, talento: +8, mercado: +18 }
+        }
+      ]
+    }
+  ],
+  leccionesVictoria: [
+    'La ventaja competitiva sostenible proviene de ser diferente, no de ser mejor en lo mismo: la diferenciación de Porter defiende el margen frente a guerras de precios.',
+    'Competir en precio contra un actor con estructura de costes superior es una trampa: la eficiencia operativa no es estrategia.',
+    'La automatización total destruye la cadena de valor que te diferencia; una arquitectura híbrida humano-IA protege riesgo, talento y reputación.',
+    'Elegir el nicho donde competir (y dónde no) es la decisión estratégica más rentable ante un competidor tradicional con más capital.',
+    'En contextos regulatorios duros, el cumplimiento proactivo es un activo reputacional y una barrera de entrada, no un coste.'
+  ]
+};
+
+/* ============================================================
+   ESTADO DE JUEGO
+   ============================================================ */
+const KPI_KEYS = ['finanzas', 'operaciones', 'talento', 'mercado'];
+const KPI_LABELS = { finanzas: '💰 Finanzas', operaciones: '⚙️ Operaciones', talento: '👥 Capital Humano', mercado: '📈 Mercado' };
+let kpis = { finanzas: 50, operaciones: 50, talento: 50, mercado: 50 };
+let dilemmaIndex = 0;
+let gameOver = false;
+
+/* ============================================================
+   RENDER
+   ============================================================ */
+function renderKPIs() {
+  KPI_KEYS.forEach(k => {
+    const v = Math.round(kpis[k]);
+    document.getElementById('val-' + k).textContent = v + '%';
+    document.getElementById('kpi-' + k).classList.toggle('low', v <= 20);
+  });
+}
+
+function renderDilemma() {
+  const d = CONFIG_ETAPA.dilemas[dilemmaIndex];
+  document.getElementById('dilemma-tag').textContent =
+    'Dilema ' + (dilemmaIndex + 1) + ' de ' + CONFIG_ETAPA.dilemas.length;
+  document.getElementById('dilemma-narrative').textContent = d.narrativa;
+  const cont = document.getElementById('options-container');
+  cont.innerHTML = '';
+  d.opciones.forEach((op, i) => {
+    const btn = document.createElement('button');
+    btn.className = 'option';
+    btn.textContent = op.texto;
+    btn.addEventListener('click', () => elegirOpcion(i));
+    cont.appendChild(btn);
+  });
+}
+
+function elegirOpcion(i) {
+  if (gameOver) return;
+  const op = CONFIG_ETAPA.dilemas[dilemmaIndex].opciones[i];
+  KPI_KEYS.forEach(k => { kpis[k] += op.impactos[k]; });
+  renderKPIs();
+  const impactsDiv = document.getElementById('modal-impacts');
+  impactsDiv.innerHTML = '';
+  KPI_KEYS.forEach(k => {
+    const delta = op.impactos[k];
+    const chip = document.createElement('span');
+    chip.className = 'impact ' + (delta >= 0 ? 'up' : 'down');
+    chip.textContent = KPI_LABELS[k] + ': ' + (delta >= 0 ? '+' : '') + delta;
+    impactsDiv.appendChild(chip);
+  });
+  document.getElementById('modal-feedback').textContent = op.feedback;
+  document.getElementById('modal-backdrop').style.display = 'flex';
+}
+
+document.getElementById('modal-btn').addEventListener('click', () => {
+  document.getElementById('modal-backdrop').style.display = 'none';
+  if (KPI_KEYS.some(k => kpis[k] <= 0)) {
+    terminarJuego(false);
+    return;
+  }
+  dilemmaIndex++;
+  if (dilemmaIndex >= CONFIG_ETAPA.dilemas.length) {
+    terminarJuego(true);
+  } else {
+    renderDilemma();
+  }
+});
+
+function terminarJuego(victoria) {
+  gameOver = true;
+  document.getElementById('screen-game').style.display = 'none';
+  document.getElementById('screen-result').style.display = 'block';
+  const title = document.getElementById('result-title');
+  const msg = document.getElementById('result-message');
+  const lessons = document.getElementById('result-lessons');
+  const fk = document.getElementById('final-kpis');
+  fk.innerHTML = '';
+  KPI_KEYS.forEach(k => {
+    const box = document.createElement('div');
+    box.className = 'kpi';
+    box.innerHTML = '<div class="label">' + KPI_LABELS[k] + '</div><div class="value">' +
+      Math.round(Math.max(0, kpis[k])) + '%</div>';
+    fk.appendChild(box);
+  });
+  lessons.innerHTML = '';
+  if (victoria) {
+    title.textContent = '✅ Etapa Superada';
+    title.className = 'result-title win';
+    msg.textContent = 'Has liderado Creditia superando los 3 dilemas con todos los KPIs por encima del 0%. Tu capacidad para defender la diferenciación frente a la presión competitiva y regulatoria demuestra dominio del tema: ' + CONFIG_ETAPA.temaAcademico + '.';
+    CONFIG_ETAPA.leccionesVictoria.forEach(l => {
+      const li = document.createElement('li');
+      li.textContent = l;
+      lessons.appendChild(li);
+    });
+    window.__victoria = true;
+  } else {
+    title.textContent = '❌ Destituido';
+    title.className = 'result-title lose';
+    const muerto = KPI_KEYS.find(k => kpis[k] <= 0);
+    msg.textContent = 'El consejo de administración ha decidido relevarte del cargo. Tu ' +
+      KPI_LABELS[muerto].replace(/^\S+\s/, '') +
+      ' colapsó al 0% (o menos). En un entorno de ' + CONFIG_ETAPA.contextoMacro.toLowerCase() +
+      ', las decisiones que sacrifican indicadores críticos sin una tesis de recuperación acaban en quiebra: sin margen, sin equipo operativo o sin reputación, el modelo de ' +
+      CONFIG_ETAPA.sector + ' deja de ser viable.';
+    window.__victoria = false;
+  }
+}
+
+/* ============================================================
+   PERSISTENCIA LOCAL Y SINCRONIZACIÓN CLOUD (GitHub API)
+   ============================================================ */
+async function sincronizarProgreso() {
+  const status = document.getElementById('sync-status');
+  const progreso = JSON.parse(localStorage.getItem('emba_progeso'));
+  if (progreso) {
+    const etapa = CONFIG_ETAPA.numeroEtapa;
+    if (!progreso.etapas_completadas || !progreso.etapas_completadas.includes(etapa)) {
+      progreso.etapas_completadas = progreso.etapas_completadas || [];
+      progreso.etapas_completadas.push(etapa);
+      progreso.puntuacion_global = (progreso.puntuacion_global || 0) + 100;
+      localStorage.setItem('emba_progeso', JSON.stringify(progreso));
+    }
+  }
+
+  const token = localStorage.getItem('emba_github_token');
+  const sha = localStorage.getItem('emba_github_sha');
+  if (token && progreso && progreso.jugador_clave) {
+    try {
+      status.textContent = 'Sincronizando progreso con la nube...';
+      const body = {
+        message: 'Etapa ' + CONFIG_ETAPA.numeroEtapa + ' completada',
+        content: btoa(unescape(encodeURIComponent(JSON.stringify(progreso))))
+      };
+      if (sha) body.sha = sha;
+      const resp = await fetch(
+        'https://github.com_' + progreso.jugador_clave + '.json',
+        {
+          method: 'PUT',
+          headers: { 'Authorization': 'token ' + token },
+          body: JSON.stringify(body)
+        }
+      );
+      const resultado = await resp.json();
+      if (resp.ok && resultado.content && resultado.content.sha) {
+        localStorage.setItem('emba_github_sha', resultado.content.sha);
+        status.textContent = 'Progreso sincronizado correctamente.';
+      } else {
+        status.textContent = 'No se pudo sincronizar con la nube (se conserva el progreso local).';
+      }
+    } catch (e) {
+      status.textContent = 'No se pudo sincronizar con la nube (se conserva el progreso local).';
+    }
+  }
+  setTimeout(() => { window.location.href = 'index.html'; }, 800);
+}
+
+document.getElementById('btn-return').addEventListener('click', async () => {
+  if (window.__victoria) {
+    await sincronizarProgreso();
+  } else {
+    window.location.href = 'index.html';
+  }
+});
+
+renderKPIs();
+renderDilemma();
+</script>
+</body>
+</html>
