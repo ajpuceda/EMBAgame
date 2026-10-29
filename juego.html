@@ -551,7 +551,7 @@ function detectarEtapa() {
 
 function rnd(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
 function signo(n) { return n >= 0 ? '+' + n : String(n); }
-function clampI(n) { return Math.max(-12, Math.min(12, Math.round(Number(n) || 0))); }
+function clampI(n) { return Math.max(-15, Math.min(15, Math.round(Number(n) || 0))); }
 function shuffle(arr) {
   const a = arr.slice();
   for (let i = a.length - 1; i > 0; i--) {
@@ -605,11 +605,11 @@ async function generarEscenarioIA(etapa, apiKey) {
   const prompt = 'Eres diseñador instruccional de una escuela de negocios top (Harvard/INSEAD) y guionista de simuladores ejecutivos. Genera UN trimestre del simulador en JSON estricto (sin markdown), en español. Regla de oro: enunciados y opciones NO pueden dar pistas sobre cuál es la mejor decisión; todas deben sonar igual de razonables con trade-offs reales. Estructura exacta:\n' +
     '{"teoria": {"intro": "1-2 frases conectando el tema con la práctica directiva", "puntos": ["4-5 conceptos clave del tema, didácticos"]},\n' +
     '"dilemas": [\n' +
-    ' {"tipo": "eleccion", "narrativa": "3 frases de situación del trimestre", "concepto": "marco teórico concreto que se pone a prueba", "opciones": [4 objetos {"texto": "decisión ejecutiva neutra", "feedback": "explicación didáctica del porqué, 3 frases", "impactos": {"finanzas": -12..12, "operaciones": -12..12, "talento": -12..12, "mercado": -12..12}}]},\n' +
+    ' {"tipo": "eleccion", "narrativa": "3 frases de situación del trimestre", "concepto": "marco teórico concreto que se pone a prueba", "opciones": [4 objetos {"texto": "decisión ejecutiva neutra, sin pistas", "feedback": "explicación didáctica del porqué, 3 frases", "impactos": {"finanzas": -15..15, "operaciones": -15..15, "talento": -15..15, "mercado": -15..15}} — exactamente una opción es la alineada con la teoría (neto suavemente positivo, sin daños profundos), una o dos intermedias, y una trampa seductora (un KPI sube +10 o más, dos KPIs bajan -10 o peor)],\n' +
     ' {"tipo": "slider", "narrativa": "3 frases: reparto de un fondo entre dos palancas", "concepto": "marco", "etiquetaA": "palanca A", "etiquetaB": "palanca B", "efectosA": {"finanzas": -12..12, "operaciones": -12..12, "talento": -12..12, "mercado": -12..12}, "efectosB": {...}, "posicionOptima": 30-70, "feedbackOptimo": "3 frases", "feedbackExtremoA": "riesgo de exceso hacia A", "feedbackExtremoB": "riesgo de exceso hacia B"},\n' +
-    ' {"tipo": "doble", "narrativa": "3 frases: problema complejo que exige dos decisiones simultáneas", "concepto": "marco integrador", "subdecisiones": [2 objetos {"modulo": "' + subMod1 + '" o "' + subMod2 + '", "titulo": "la decisión a tomar", "opciones": [3 objetos {"texto": neutro, "feedback": didáctico, "impactos": ±7}]}]}\n' +
+    ' {"tipo": "doble", "narrativa": "3 frases: problema complejo que exige dos decisiones simultáneas", "concepto": "marco integrador", "subdecisiones": [2 objetos {"modulo": "' + subMod1 + '" o "' + subMod2 + '", "titulo": "la decisión a tomar", "opciones": [3 objetos: una coherente (neto +4 a +7, sin daños profundos), una intermedia, una trampa (un KPI +7, dos KPIs -8 o peor); textos neutros sin pistas]}]}\n' +
     ']}\n' +
-    'Empresa: ' + EMPRESA + ', ' + fase.nombre + ' (año ' + fase.ano + ', ' + fase.empleados + ' empleados, ' + fase.ingresos + '). Estado actual de KPIs: ' + kpisTxt + '. Tema obligatorio: "' + tema.tema + '" (módulo: ' + modulo + '). Contexto macro: ' + contexto + '. Evento: ' + evento + '. Ninguna opción debe dominar en los 4 KPIs. Devuelve solo el JSON.';
+    'Empresa: ' + EMPRESA + ', ' + fase.nombre + ' (año ' + fase.ano + ', ' + fase.empleados + ' empleados, ' + fase.ingresos + '). Estado actual de KPIs: ' + kpisTxt + '. Tema obligatorio: "' + tema.tema + '" (módulo: ' + modulo + '). Contexto macro: ' + contexto + '. Evento: ' + evento + '. Ninguna opción debe dominar en los 4 KPIs y ningún texto puede delatar cuál es la trampa ni cuál la correcta: solo el razonamiento teórico debe permitir distinguirlas. Devuelve solo el JSON.';
   const resp = await fetch('https://api.mistral.ai/v1/chat/completions', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + apiKey },
@@ -684,52 +684,52 @@ function generarEscenarioLocal(etapa) {
 
 const OPCIONES_NEUTRAS = [
   {
-    texto: 'Reordenar la casa antes de mover ficha: rediseñar cómo se toman las decisiones y quién responde por cada resultado.',
-    feedback: 'Estructura antes de velocidad: sin claridad de gobernanza la ejecución se diluye. Ganas disciplina operativa y confianza del equipo, pero el mercado espera y el reloj de la caja no se detiene. El tema del trimestre se aplica precisamente en cómo ordenas los trade-offs antes de comprometer recursos.',
-    impactos: { finanzas: -2, operaciones: +7, talento: +7, mercado: -4 }
+    texto: 'Convocar un comité de crisis con criterios explícitos de priorización: clasificar los impactos por criticidad, proteger la capacidad operativa y humana esencial y comunicar un plan con hitos verificables a clientes e inversores.',
+    feedback: 'Diagnóstico antes que acción: priorizar por criticidad es exactamente lo que exige el marco del trimestre. Proteges ejecución y moral con un coste puntual de caja, y el mercado premia la previsibilidad. Es la decisión que la teoría sostiene ante el consejo.',
+    impactos: { finanzas: -4, operaciones: +5, talento: +5, mercado: +2 }
   },
   {
-    texto: 'Tomar la ofensiva comercial: volcarse en el segmento de clientes que más responde y aceptar el desgaste que venga.',
-    feedback: 'Atacar donde el mercado responde maximiza la señal exterior, pero las palancas internas quedan tirantes: caja comprometida y equipos al límite. La teoría enseña que la demanda ganada sin capacidad para servirla destruye reputación más rápido de lo que la construye.',
-    impactos: { finanzas: -7, operaciones: -4, talento: -4, mercado: +11 }
+    texto: 'Igualar el movimiento del mercado con una ofensiva comercial frontal: precios agresivos y máxima inversión en captación para defender la cuota durante dos años, aceptando sangrado de caja.',
+    feedback: 'La guerra de precios es la trampa clásica que la teoría advierte: confunde cuota con rentabilidad. Financiar cuota con margen negativo drena caja y quema equipos; la demanda ganada sin capacidad de servirla destruye reputación más rápido de lo que la construye.',
+    impactos: { finanzas: -11, operaciones: -5, talento: -8, mercado: +13 }
   },
   {
-    texto: 'Proteger el balance: congelar la inversión no comprometida y priorizar la generación de caja del trimestre.',
-    feedback: 'La caja compra tiempo y opciones futuras — es la reserva estratégica clásica. Pero el mensaje interno es de contención: el talento con ambición lee las señales, y el mercado nota que la empresa se repliega. El equilibrio entre solvencia e impulso es el corazón de este tema.',
-    impactos: { finanzas: +10, operaciones: +2, talento: -7, mercado: -6 }
+    texto: 'Cerrar el grifo: congelar toda inversión no comprometida, retener caja y esperar a que el entorno se estabilice antes de mover ficha.',
+    feedback: 'La parálisis ante un shock es una decisión en sí misma. La caja compra tiempo, pero el mercado percibe repliegue y el talento con ambición lee las señales: los mejores se van justo cuando más se les necesita. La teoría exige anticipar, no observar.',
+    impactos: { finanzas: +9, operaciones: -2, talento: -8, mercado: -9 }
   },
   {
-    texto: 'Invertir en el motor interno: incorporar capacidad y talento adicionales antes de acelerar nada.',
-    feedback: 'Construir capacidad antes de la demanda es apuesta de fondo: si llega el crecimiento, lo absorbes; si no llega, el coste fijo pesa. La teoría distingue aquí capacidad productiva de capacidad estratégica — solo la segunda crea ventaja defendible.',
-    impactos: { finanzas: -7, operaciones: +7, talento: +9, mercado: -3 }
+    texto: 'Digitalizar a toda velocidad: automatizar por completo el proceso principal este mismo trimestre, sin fase piloto, para responder al evento de una vez por todas.',
+    feedback: 'La tecnología sin diagnóstico entrega un proceso roto más rápido: automatizar sin rediseñar el flujo añade coste fijo, satura a un equipo sin red de seguridad y confunde velocidad con progreso. El marco del trimestre distingue transformación de improvisación.',
+    impactos: { finanzas: -6, operaciones: +6, talento: -6, mercado: -1 }
   }
 ];
 
 const BANCO_SUBDECISIONES = {
   'Estrategia': [
-    { texto: 'Priorizar un único mercado y posicionar con nitidez', feedback: 'El foco concentra recursos y mensaje: la propuesta de valor se entiende y se defiende mejor.', impactos: { mercado: +7, finanzas: -3, talento: -1, operaciones: +1 } },
-    { texto: 'Diversificar la apuesta en tres frentes paralelos', feedback: 'La diversificación reparte riesgo pero también atención: sin foco, ninguna posición madura lo suficiente para ser defendible.', impactos: { mercado: +3, finanzas: -5, operaciones: -4, talento: +2 } },
-    { texto: 'Adquirir un competidor pequeño para ganar tiempo', feedback: 'Comprar tiempo puede ser racional, pero la integración consume capacidad directiva que a menudo se subestima.', impactos: { mercado: +5, finanzas: -8, operaciones: -3, talento: -3 } }
+    { texto: 'Priorizar un único mercado y posicionar con nitidez', feedback: 'El foco concentra recursos y mensaje: la propuesta de valor se entiende y se defiende mejor.', impactos: { mercado: +6, finanzas: -2, talento: +1, operaciones: +1 } },
+    { texto: 'Diversificar la apuesta en tres frentes paralelos', feedback: 'La diversificación reparte riesgo pero también atención: sin foco, ninguna posición madura lo suficiente para ser defendible.', impactos: { mercado: +3, finanzas: -4, operaciones: -3, talento: +2 } },
+    { texto: 'Adquirir apalancada un competidor pequeño para ganar tiempo', feedback: 'Comprar tiempo puede ser racional, pero con apalancamiento la integración consume caja y capacidad directiva que casi siempre se subestima: la trampa del crecimiento comprado.', impactos: { mercado: +7, finanzas: -9, operaciones: -4, talento: -4 } }
   ],
   'Finanzas': [
-    { texto: 'Ampliar la línea de crédito disponible', feedback: 'La liquidez amplía el margen de maniobra; su coste financiero se nota si el apalancamiento crece sin control.', impactos: { finanzas: +8, mercado: -2, talento: 0, operaciones: +1 } },
-    { texto: 'Emitir deuda a medio plazo', feedback: 'La deuda estructurada financia sin diluir, pero convierte flexibilidad en obligación fija.', impactos: { finanzas: +6, operaciones: -2, talento: -1, mercado: -1 } },
-    { texto: 'Vender una participación minoritaria a un fondo', feedback: 'La entrada de capital privado trae caja y consejo, pero también una agenda propia en el accionariado.', impactos: { finanzas: +8, mercado: -3, talento: -2, operaciones: 0 } }
+    { texto: 'Renegociar la deuda a largo plazo y optimizar el capital de trabajo', feedback: 'Alargar vencimientos y liberar caja atrapada en el ciclo operativo es la palanca sana: solvencia sin sacrificar impulso.', impactos: { finanzas: +7, operaciones: +2, talento: -1, mercado: -1 } },
+    { texto: 'Ampliar la línea de crédito disponible', feedback: 'La liquidez amplía el margen de maniobra; su coste financiero se nota si el apalancamiento crece sin control.', impactos: { finanzas: +5, operaciones: +1, mercado: -2, talento: 0 } },
+    { texto: 'Financiar la expansión con deuda puente a 18 meses y factoring agresivo, asumiendo un apalancamiento del 4x', feedback: 'El exceso de confianza es el sesgo más caro de las finanzas conductuales: apalancar al máximo compra crecimiento hoy y secuestra todo el margen de error mañana. Un solo trimestre flojo y la deuda decide por ti.', impactos: { mercado: +6, finanzas: -10, operaciones: -3, talento: -3 } }
   ],
   'Marketing': [
-    { texto: 'Concentrar la inversión en el canal que mejor convierte', feedback: 'La eficiencia de corto plazo maximiza el retorno inmediato, pero construye poca marca.', impactos: { mercado: +7, finanzas: +1, operaciones: -2, talento: -2 } },
-    { texto: 'Redistribuir presupuesto hacia marca y notoriedad', feedback: 'La marca es la barrera de entrada futura: paga lentamente y se destruye rápido.', impactos: { mercado: +5, finanzas: -4, talento: +1, operaciones: 0 } },
-    { texto: 'Activar un programa de referidos con los clientes actuales', feedback: 'El cliente que trae cliente llega con coste bajo y confianza alta; el riesgo es depender de incentivos.', impactos: { mercado: +4, finanzas: +2, operaciones: -3, talento: -1 } }
+    { texto: 'Activar un programa de referidos y retención con los clientes actuales', feedback: 'El cliente que trae cliente llega con coste bajo y confianza alta: maximiza el CLV sin inflar el CAC.', impactos: { mercado: +5, finanzas: +2, operaciones: -2, talento: -1 } },
+    { texto: 'Redistribuir presupuesto hacia marca y notoriedad', feedback: 'La marca es la barrera de entrada futura: paga lentamente y se destruye rápido.', impactos: { mercado: +4, finanzas: -3, talento: +1, operaciones: 0 } },
+    { texto: 'Igualar los precios del competidor y doblar la inversión en captación', feedback: 'Competir en precio contra un rival con más colchón es la trampa que la teoría de posicionamiento describe con precisión: la cuota sube en el informe y el modelo se desangra en la caja.', impactos: { mercado: +8, finanzas: -10, operaciones: -4, talento: -3 } }
   ],
   'Operaciones': [
-    { texto: 'Automatizar el proceso con más cola de trabajo', feedback: 'Automatizar el cuello de botella real multiplica el sistema; automatizar lo equivocado solo añade coste fijo.', impactos: { operaciones: +8, finanzas: -5, talento: -4, mercado: +2 } },
-    { texto: 'Ampliar turnos y capacidad manual temporal', feedback: 'La capacidad flexible absorbe picos sin deuda tecnológica, pero es cara y difícil de sostener.', impactos: { operaciones: +5, finanzas: -5, talento: +3, mercado: 0 } },
-    { texto: 'Rediseñar el flujo completo antes de tocar tecnología', feedback: 'Mejorar un proceso roto con software entrega un proceso roto más rápido: primero el flujo, luego la máquina.', impactos: { operaciones: +6, finanzas: -2, talento: +2, mercado: -2 } }
+    { texto: 'Rediseñar el flujo completo antes de tocar tecnología', feedback: 'Primero el flujo, luego la máquina: mejorar un proceso roto con software entrega un proceso roto más rápido.', impactos: { operaciones: +6, finanzas: -2, talento: +2, mercado: -2 } },
+    { texto: 'Ampliar turnos y capacidad manual temporal', feedback: 'La capacidad flexible absorbe picos sin deuda tecnológica, pero es cara y difícil de sostener.', impactos: { operaciones: +4, finanzas: -4, talento: +2, mercado: 0 } },
+    { texto: 'Recortar mantenimiento y control de calidad para liberar caja este trimestre', feedback: 'Desinvertir en mantenimiento es la trampa operativa clásica: la caja mejora un trimestre y la fiabilidad se deteriora en silencio hasta romperse ante el cliente. Los costes de la calidad siempre vuelven cobrando intereses.', impactos: { finanzas: +8, operaciones: -9, mercado: -6, talento: -2 } }
   ],
   'Capital Humano': [
-    { texto: 'Subir la compensación variable ligada a hitos', feedback: 'El variable alinea incentivos con resultados, pero enseña a perseguir el número y no la misión.', impactos: { talento: +6, finanzas: -4, mercado: +1, operaciones: 0 } },
-    { texto: 'Crear un programa de desarrollo y promoción interna', feedback: 'Desarrollar dentro construye cultura y memoria; su retorno llega en años, no en trimestres.', impactos: { talento: +7, finanzas: -2, mercado: -1, operaciones: +1 } },
-    { texto: 'Incorporar perfiles senior externos para los roles críticos', feedback: 'El talento externo trae método y red de contactos; su integración es más lenta de lo que el organigrama sugiere.', impactos: { talento: +5, finanzas: -5, operaciones: +2, mercado: -1 } }
+    { texto: 'Crear un programa de desarrollo y promoción interna', feedback: 'Desarrollar dentro construye cultura y memoria: la ventaja más difícil de copiar.', impactos: { talento: +7, finanzas: -2, operaciones: +1, mercado: -1 } },
+    { texto: 'Subir la compensación variable ligada a hitos', feedback: 'El variable alinea incentivos con resultados, pero enseña a perseguir el número y no la misión.', impactos: { talento: +5, finanzas: -4, mercado: +1, operaciones: 0 } },
+    { texto: 'Congelar salarios, vacaciones y contrataciones hasta nuevo aviso', feedback: 'La contención total ahorra un trimestre y destruye varios años de confianza: el talento clave no espera a "nuevo aviso" y la fuga silenciosa es la más caras de todas. La teoría lo dice claro: se obtiene lo que se premia, y también lo que se castiga.', impactos: { finanzas: +8, talento: -11, mercado: -3, operaciones: -3 } }
   ]
 };
 
@@ -751,8 +751,8 @@ function construirDilemas(etapa, tema, modulo, fase, contexto, evento) {
       '". Tú decides el reparto exacto. Los impactos sobre tus KPIs quedan ocultos: dispones de los informes de los analistas, que rara vez coinciden.',
     etiquetaA: 'Consolidar la máquina actual',
     etiquetaB: 'Construir la siguiente curva',
-    efectosA: { finanzas: +5, operaciones: +9, talento: +4, mercado: -8 },
-    efectosB: { finanzas: -9, operaciones: -5, talento: -4, mercado: +13 },
+    efectosA: { finanzas: +6, operaciones: +10, talento: +5, mercado: -11 },
+    efectosB: { finanzas: -13, operaciones: -6, talento: -5, mercado: +16 },
     posicionOptima: opt,
     feedbackOptimo: 'El punto didáctico de "' + tema.tema + '" es que los recursos escasos exigen equilibrio: consolidar en exceso te hace irrelevante mañana y construir en exceso te deja sin caja hoy. Tu reparto protege la máquina que genera caja mientras construye la posición futura.',
     feedbackExtremoA: 'Con casi todo el fondo en consolidación, la caja respira pero el mercado percibe una empresa a la defensiva justo cuando la ventana competitiva está abierta. ',
@@ -898,7 +898,7 @@ function renderSlider(d) {
       '<div class="slider-zonas"><span>Zona A: casi todo a consolidar</span><span>Zona mixta</span><span>Zona B: casi todo a la nueva curva</span></div>' +
       '<div class="slider-readout">Reparto elegido: <b id="alloc-readout-a">50%</b> a A · <b id="alloc-readout-b">50%</b> a B</div>' +
       '<div class="analistas">' +
-        '<h5>📊 INFORMES ORIENTATIVOS — los impactos reales en tus KPIs permanecen ocultos</h5>' +
+        '<h5>📊 INFORMES ORIENTATIVOS — 4 variables correlacionadas, solo 2 son relevantes; los impactos reales en tus KPIs permanecen ocultos</h5>' +
         '<div class="analista-chart">' + datos.svg + '</div>' +
         datos.quotes +
       '</div>' +
@@ -928,37 +928,51 @@ function renderSlider(d) {
 }
 
 function construirDatosAnalistas(d) {
-  const W = 440, H = 150, pad = 28;
+  const W = 460, H = 190, pad = 30;
   function puntosCurva(fn) {
     const pts = [];
-    for (let x = 0; x <= 100; x += 10) {
+    for (let x = 0; x <= 100; x += 5) {
       const y = fn(x);
       pts.push((pad + x / 100 * (W - pad * 2)).toFixed(1) + ',' + (H - pad - y / 100 * (H - pad * 2)).toFixed(1));
     }
     return pts.join(' ');
   }
-  const pico = Math.max(15, Math.min(85, d.posicionOptima + Math.floor(Math.random() * 17 - 8)));
-  const ingresos = x => 25 + 55 * Math.exp(-Math.pow(x - pico, 2) / 1400);
-  const riesgo = x => 20 + 0.55 * x + 12 * Math.exp(-Math.pow(x - 85, 2) / 500);
+  const opt = d.posicionOptima;
+  const picoRelevantea = Math.max(20, Math.min(80, opt + Math.floor(Math.random() * 13 - 6)));
+  const mejorPunto = Math.max(20, Math.min(80, picoRelevantea + Math.floor(Math.random() * 9 - 4)));
+  const curvaMargen = x => 38 + 46 * Math.exp(-Math.pow(x - mejorPunto, 2) / 900);
+  const curvaRiesgoLiquido = x => 30 + 0.5 * x + 22 * Math.exp(-Math.pow(x - 88, 2) / 380);
+  const ruidoBase = 42 + Math.random() * 8;
+  const curvaRuido1 = x => ruidoBase + 9 * Math.sin(x / 11 + Math.random() * 6) + x * 0.02;
+  const ruidoBase2 = 55 + Math.random() * 6;
+  const curvaRuido2 = x => ruidoBase2 - 7 * Math.sin(x / 14 + Math.random() * 6) - x * 0.03;
   const svg =
     '<svg viewBox="0 0 ' + W + ' ' + H + '" style="width:100%; height:auto;">' +
       '<line x1="' + pad + '" y1="' + (H - pad) + '" x2="' + (W - pad) + '" y2="' + (H - pad) + '" stroke="#2b3a63" stroke-width="1"/>' +
       '<line x1="' + pad + '" y1="' + pad + '" x2="' + pad + '" y2="' + (H - pad) + '" stroke="#2b3a63" stroke-width="1"/>' +
-      '<text x="' + (pad + 2) + '" y="' + (H - 8) + '" fill="#64748b" font-size="9">100% A</text>' +
-      '<text x="' + (W - pad - 30) + '" y="' + (H - 8) + '" fill="#64748b" font-size="9">100% B</text>' +
-      '<polyline points="' + puntosCurva(ingresos) + '" fill="none" stroke="#00f2fe" stroke-width="2.5"/>' +
-      '<polyline points="' + puntosCurva(riesgo) + '" fill="none" stroke="#f59e0b" stroke-width="2" stroke-dasharray="5,4"/>' +
+      '<text x="' + (pad + 2) + '" y="' + (H - 10) + '" fill="#64748b" font-size="9">100% A</text>' +
+      '<text x="' + (W - pad - 32) + '" y="' + (H - 10) + '" fill="#64748b" font-size="9">100% B</text>' +
+      '<text x="' + (pad - 6) + '" y="' + (pad + 8) + '" fill="#64748b" font-size="8" transform="rotate(-90 ' + (pad - 10) + ' ' + (pad + 14) + ')">Índice (0-100)</text>' +
+      '<polyline points="' + puntosCurva(curvaRuido2) + '" fill="none" stroke="#475569" stroke-width="1.5" stroke-dasharray="2,3" opacity=".7"/>' +
+      '<polyline points="' + puntosCurva(curvaRuido1) + '" fill="none" stroke="#64748b" stroke-width="1.5" stroke-dasharray="2,3" opacity=".7"/>' +
+      '<polyline points="' + puntosCurva(curvaMargen) + '" fill="none" stroke="#00f2fe" stroke-width="2.5"/>' +
+      '<polyline points="' + puntosCurva(curvaRiesgoLiquido) + '" fill="none" stroke="#ef4444" stroke-width="2.5"/>' +
     '</svg>' +
     '<div class="chart-legend">' +
-      '<span><i style="background:#00f2fe"></i>Ingresos esperados a 18 meses (consultora externa, ±20% error)</span>' +
-      '<span><i style="background:#f59e0b"></i>Tensión esperada de caja (auditoría interna)</span>' +
-    '</div>';
-  const recA = Math.max(15, Math.min(85, d.posicionOptima + Math.floor(Math.random() * 25 - 12)));
-  const recB = Math.max(15, Math.min(85, d.posicionOptima + Math.floor(Math.random() * 25 - 12)));
+      '<span><i style="background:#00f2fe"></i><b>Margen operativo a 12M</b> (contable, fiable)' +
+      '<span><i style="background:#ef4444"></i><b>Riesgo de liquidez</b> (tesorería, fiable)' +
+      '<span><i style="background:#64748b"></i>Satisfacción de plantilla (encuesta interna)' +
+      '<span><i style="background:#475569"></i>Menciones de marca (medición externa)' +
+    '</div>' +
+    '<p style="font-size:.72rem; color:#94a3b8; line-height:1.5; margin-top:8px;">' +
+      'Las cuatro series están correlacionadas entre sí, pero solo <b style="color:#00f2fe">dos</b> describen de verdad lo que le pasará a tu empresa: ' +
+      'las curvas grises se mueven con el reparto pero <b>no explican el impacto</b> — son ruido con buena pinta. Distinguir señal de ruido es, en sí misma, una competencia directiva.</p>';
+  const recA = Math.max(15, Math.min(85, opt + Math.floor(Math.random() * 25 - 12)));
+  const recB = Math.max(15, Math.min(85, opt + Math.floor(Math.random() * 25 - 12)));
   const quotes =
-    '<div class="analista-quote"><b>CFO:</b> "Nuestra modelización interna favorece un reparto cercano al ' + recA + '% hacia la palanca A. La incertidumbre del modelo es alta, pero es lo que tenemos."</div>' +
-    '<div class="analista-quote"><b>Directora de Estrategia:</b> "El benchmark del sector sitúa a los ganadores de los últimos ciclos cerca del ' + recB + '% hacia la palanca B. Ojo: el benchmark también incluye a los que quebraron."</div>' +
-    '<div class="analista-quote"><b>Consejo externo:</b> "Ninguna empresa de este sector ha sobrevivido tres años con repartos extremos. El diablo está en la coherencia con el resto de decisiones del trimestre."</div>';
+    '<div class="analista-quote"><b>CFO:</b> "Solo fío del margen y de la liquidez; el resto es folklore con gráficos. Nuestra modelización sitúa el punto de conflicto cerca del ' + recA + '% hacia la palanca A — y el margen de error no es pequeño."</div>' +
+    '<div class="analista-quote"><b>Directora de Estrategia:</b> "El benchmark del sector premia repartos cercanos al ' + recB + '% hacia la palanca B. Ojo: el benchmark también incluye a los que quebraron siguiéndolo."</div>' +
+    '<div class="analista-quote"><b>Auditoría interna:</b> "Cuidado con las dos curvas grises: se mueven mucho y explican poco. Cuando el margen y la liquidez apuntan en la misma dirección, ahí está la respuesta; cuando se contradicen, la liquidez suele ganar."</div>';
   return { svg: svg, quotes: quotes };
 }
 
