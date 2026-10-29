@@ -590,6 +590,11 @@ document.getElementById('btn-start').addEventListener('click', async () => {
    DETECCIÓN AUTOMÁTICA DE NIVEL
    ============================================================ */
 function detectarEtapa() {
+  const param = new URLSearchParams(window.location.search).get('etapa');
+  if (param) {
+    const n = parseInt(param, 10);
+    if (n >= 1 && n <= 100) return n;
+  }
   const seleccionada = localStorage.getItem('emba_etapa_seleccionada');
   if (seleccionada !== null) {
     const n = parseInt(seleccionada, 10);
