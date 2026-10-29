@@ -138,6 +138,22 @@
   }
   .overlay input:focus { outline: none; border-color: #00f2fe; }
   .impacts { margin: 12px 0; display: flex; flex-wrap: wrap; gap: 8px; }
+  .analisis-box { background: #0a0f1d; border: 1px solid #232f52; border-radius: 10px; padding: 12px 14px; margin: 4px 0 10px; }
+  .tipo-chip { display: inline-block; padding: 3px 12px; border-radius: 999px; font-size: .72rem; font-weight: 700; margin-bottom: 8px; border: 1px solid; }
+  .tipo-chip.solido { color: #22c55e; border-color: rgba(34,197,94,.5); background: rgba(34,197,94,.08); }
+  .tipo-chip.equilibrada { color: #00f2fe; border-color: rgba(0,242,254,.5); background: rgba(0,242,254,.08); }
+  .tipo-chip.trampa { color: #ef4444; border-color: rgba(239,68,68,.5); background: rgba(239,68,68,.08); }
+  .tipo-chip.riesgosa { color: #f59e0b; border-color: rgba(245,158,11,.5); background: rgba(245,158,11,.08); }
+  .lectura { font-size: .85rem; line-height: 1.6; color: #cbd5e1; margin-bottom: 8px; }
+  .nota-contexto { font-size: .82rem; line-height: 1.6; color: #e2b34a; border-left: 2px solid #f59e0b; padding-left: 10px; }
+  .contraste-box { margin-top: 10px; }
+  .contraste-box h6 { color: #00f2fe; font-size: .78rem; margin: 12px 0 8px; letter-spacing: .5px; }
+  .contraste-opt { background: #0a0f1d; border: 1px solid #232f52; border-left: 2px solid #f59e0b; border-radius: 8px; padding: 10px 12px; margin-bottom: 8px; }
+  .contraste-opt.optima { border-left-color: #22c55e; }
+  .co-titulo { font-size: .8rem; font-weight: 600; color: #e2e8f0; margin-bottom: 6px; line-height: 1.45; }
+  .co-feedback { font-size: .8rem; line-height: 1.55; color: #94a3b8; margin-top: 6px; }
+  .debrief-analisis { margin-top: 10px; }
+  .debrief-analisis p { font-size: .84rem; line-height: 1.6; color: #cbd5e1; margin: 6px 0; }
   .impact { border-radius: 999px; padding: 5px 12px; font-size: .78rem; font-weight: 600; border: 1px solid; }
   .impact.up { color: #22c55e; border-color: rgba(34,197,94,.5); background: rgba(34,197,94,.08); }
   .impact.down { color: #ef4444; border-color: rgba(239,68,68,.5); background: rgba(239,68,68,.08); }
@@ -295,6 +311,7 @@
     <h3 id="modal-title">Consecuencias de tu decisión</h3>
     <p id="modal-feedback"></p>
     <div class="impacts" id="modal-impacts"></div>
+    <div id="modal-analisis"></div>
     <button id="modal-btn">Continuar</button>
   </div>
 </div>
@@ -1116,7 +1133,134 @@ function registrarDecision(d, eleccion, feedback, impactos) {
   });
 }
 
+function analizarDecision(impactos, kpisAntes) {
+  const neto = KPI_KEYS.reduce((a, k) => a + impactos[k], 0);
+  let peorCaida = 0, kpiPeor = KPI_KEYS[0];
+  KPI_KEYS.forEach(k => {
+    const caida = -Math.min(0, impactos[k]);
+    if (caida > peorCaida) { peorCaida = caida; kpiPeor = k; }
+  });
+  const margenAntes = kpisAntes[kpiPeor];
+  let tipo, tipoLabel, lectura;
+  if (peorCaida >= 10 && neto < -8) {
+    tipo = 'trampa';
+    tipoLabel = '⚠️ Decisión trampa';
+    lectura = 'La opción parecía atractiva en un indicador, pero su coste estructural en ' + KPI_LABELS_CORTOS[kpiPeor] +
+      ' (' + signo(impactos[kpiPeor]) + ') es de los que se arrastran durante etapas. Las trampas clásicas del management comparten patrón: compran una señal visible hoy con deterioro invisible mañana.';
+  } else if (peorCaida >= 10) {
+    tipo = 'riesgosa';
+    tipoLabel = '🔶 Decisión riesgosa';
+    lectura = 'La apuesta concentra daño en ' + KPI_LABELS_CORTOS[kpiPeor] + ' (' + signo(impactos[kpiPeor]) +
+      '). No es insensata — puede ser la correcta en otra situación de partida —, pero con tu margen actual (' + Math.round(margenAntes) + '%) convierte esa variable en tu principal fuente de vulnerabilidad para las próximas rondas.';
+  } else if (neto >= 4) {
+    tipo = 'solido';
+    tipoLabel = '✅ Decisión sólida';
+    lectura = 'El razonamiento se sostiene en teoría y en tu contexto: refuerzas sin crear puntos débiles nuevos. La disciplina de no dañar ninguna palanca mientras se avanza es la marca del criterio ejecutivo maduro.';
+  } else {
+    tipo = 'equilibrada';
+    tipoLabel = '🔷 Decisión equilibrada';
+    lectura = 'Trade-off razonable: cedes terreno en un indicador para ganarlo en otro. Es la naturaleza de toda decisión estratégica real — el arte está en elegir qué ceder cuando no se puede ganar en todo.';
+  }
+  return { tipo: tipo, tipoLabel: tipoLabel, lectura: lectura, notaCtx: construirNotaContexto(impactos, kpisAntes), neto: neto, kpiPeor: kpiPeor, peorCaida: peorCaida };
+}
+
+function construirNotaContexto(impactos, kpisAntes) {
+  const anchos = KPI_KEYS.map(k => ({ k: k, margen: kpisAntes[k] - UMBRAL_COLAPSO }));
+  const masAncho = anchos.reduce((a, b) => (b.margen > a.margen ? b : a));
+  const masEstrecho = anchos.reduce((a, b) => (b.margen < a.margen ? b : a));
+  if (masAncho.margen >= 25 && impactos[masAncho.k] < 0) {
+    return '📌 Análisis situacional: tu ' + KPI_LABELS_CORTOS[masAncho.k] + ' partía con mucho margen (' +
+      Math.round(kpisAntes[masAncho.k]) + '%), así que este sacrificio era <b>asumible</b> — en una situación económica muy holgada, esta decisión podía ser incluso la ideal. ' +
+      'Pero ojo: esa holgura es herencia de decisiones anteriores, no un derecho permanente. Si hubieras llegado con ' + KPI_LABELS_CORTOS[masAncho.k] + ' apretada, la misma elección habría sido temeraria.';
+  }
+  if (masEstrecho.margen <= 12) {
+    return '📌 Análisis situacional: tu ' + KPI_LABELS_CORTOS[masEstrecho.k] + ' llegó a esta ronda con solo ' +
+      Math.round(kpisAntes[masEstrecho.k]) + '% — margen mínimo sobre el umbral del ' + UMBRAL_COLAPSO + '%. En esta situación de partida, cualquier decisión que toque esa variable debe evaluarse con lupa: aquí no hay colchón que absorba errores de cálculo.';
+  }
+  return '📌 Análisis situacional: partes con márgenes razonables en las cuatro variables (' +
+    KPI_KEYS.map(k => KPI_LABELS_CORTOS[k] + ' ' + Math.round(kpisAntes[k]) + '%').join(', ') +
+    '). Con este punto de partida, la decisión debe juzgarse por su coherencia con el marco teórico del trimestre más que por la holgura puntual de un indicador.';
+}
+
+async function analizarConIA(decisionTexto, impactos, kpisAntes, kpisDespues, analisisLocal) {
+  const key = localStorage.getItem('emba_mistral_api_key');
+  if (!key) return null;
+  const contextoEstado = KPI_KEYS.map(k => KPI_LABELS_CORTOS[k] + ': ' + Math.round(kpisAntes[k]) + '% a ' + Math.round(kpisDespues[k]) + '% (umbral critico 35%)').join('; ');
+  const prompt = 'Eres profesor de un EMBA top cerrando el caso de una decision. Empresa: ' + EMPRESA + ', ' + escenario.fase.nombre + ', tema del trimestre: "' + escenario.tema + '". Decision tomada: "' + decisionTexto + '". Estado de los KPIs antes-despues: ' + contextoEstado + '. Impactos aplicados: ' + KPI_KEYS.map(k => KPI_LABELS_CORTOS[k] + ' ' + signo(impactos[k])).join(', ') + '. Clasificacion interna previa: ' + analisisLocal.tipoLabel + '. ' +
+    'Responde en JSON estricto: {"veredicto": "1-2 frases: que tipo de respuesta fue (solida/equilibrada/riesgosa/trampa) y por que, segun la teoria del trimestre y la situacion de partida", "ideal_bajo_contexto": "1-2 frases honestas: podria haber sido la decision IDEAL asumiendo una situacion economica inicial muy buena? Si no, cual lo seria y por que", "leccion": "1 frase memorable que el directivo deberia recordar"}';
+  try {
+    const resp = await fetch('https://api.mistral.ai/v1/chat/completions', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + key },
+      body: JSON.stringify({
+        model: 'mistral-small-latest',
+        temperature: 0.5,
+        response_format: { type: 'json_object' },
+        messages: [{ role: 'user', content: prompt }]
+      })
+    });
+    if (!resp.ok) return null;
+    const data = await resp.json();
+    return JSON.parse(data.choices[0].message.content);
+  } catch (e) { return null; }
+}
+
+function h_actual() { return historial[historial.length - 1]; }
+
+function esOpcionOptima(d, i) {
+  if (d.tipo !== 'eleccion') return false;
+  let mejor = 0, mejorPuntuacion = -99;
+  d.opciones.forEach((op, idx) => {
+    const neto = KPI_KEYS.reduce((a, k) => a + op.impactos[k], 0);
+    const peor = Math.min.apply(null, KPI_KEYS.map(k => op.impactos[k]));
+    const puntuacion = neto - Math.max(0, -peor - 8) * 1.5;
+    if (puntuacion > mejorPuntuacion) { mejorPuntuacion = puntuacion; mejor = idx; }
+  });
+  return i === mejor;
+}
+
+function renderAnalisisModal(d, impactos, analisis) {
+  const cont = document.getElementById('modal-analisis');
+  let html = '<div class="analisis-box">' +
+    '<span class="tipo-chip ' + analisis.tipo + '">' + analisis.tipoLabel + '</span>' +
+    '<div class="lectura">' + analisis.lectura + '</div>' +
+    '<div class="nota-contexto">' + analisis.notaCtx + '</div>' +
+    '<div id="ia-veredicto"></div>' +
+  '</div>';
+  if (d.tipo === 'eleccion' && Array.isArray(d.opciones)) {
+    const elegidaTxt = h_actual().eleccion;
+    html += '<div class="contraste-box"><h6>🔍 Y si hubieras decidido otra cosa…</h6>';
+    d.opciones.forEach((op, i) => {
+      const elegida = elegidaTxt.indexOf(op.texto.slice(0, 40)) !== -1;
+      const esOptima = esOpcionOptima(d, i);
+      html += '<div class="contraste-opt' + (esOptima ? ' optima' : '') + '">' +
+        '<div class="co-titulo">' + (elegida ? '➡️ <b>Elegida:</b> ' : '') + (esOptima && !elegida ? '⭐ <b>La más sólida con tu partida:</b> ' : '') + op.texto.slice(0, 110) + (op.texto.length > 110 ? '…' : '') + '</div>' +
+        '<div class="impacts">' + KPI_KEYS.map(k => '<span class="impact ' + (op.impactos[k] >= 0 ? 'up' : 'down') + '">' + signo(op.impactos[k]) + ' ' + KPI_LABELS_CORTOS[k] + '</span>').join('') + '</div>' +
+        '<div class="co-feedback">' + op.feedback + '</div>' +
+      '</div>';
+    });
+    html += '</div>';
+  } else if (d.tipo === 'doble' && Array.isArray(d.subdecisiones)) {
+    const h = h_actual();
+    html += '<div class="contraste-box"><h6>🔍 Las combinaciones que descartaste</h6>';
+    d.subdecisiones.forEach(sub => {
+      sub.opciones.forEach(op => {
+        const elegida = h.eleccion.indexOf(op.texto.slice(0, 30)) !== -1;
+        if (!elegida) {
+          html += '<div class="contraste-opt"><div class="co-titulo">' + MODULO_ICONO[sub.modulo] + ' ' + sub.titulo + ' → ' + op.texto.slice(0, 90) + (op.texto.length > 90 ? '…' : '') + '</div>' +
+            '<div class="impacts">' + KPI_KEYS.map(k => '<span class="impact ' + (op.impactos[k] >= 0 ? 'up' : 'down') + '">' + signo(op.impactos[k]) + ' ' + KPI_LABELS_CORTOS[k] + '</span>').join('') + '</div>' +
+            '<div class="co-feedback">' + op.feedback + '</div></div>';
+        }
+      });
+    });
+    html += '</div>';
+  }
+  cont.innerHTML = html;
+}
+
 function aplicarRonda(impactos) {
+  const kpisAntes = {};
+  KPI_KEYS.forEach(k => { kpisAntes[k] = kpis[k]; });
   KPI_KEYS.forEach(k => {
     kpis[k] = Math.min(100, Math.max(0, kpis[k] + impactos[k]));
   });
@@ -1129,10 +1273,27 @@ function aplicarRonda(impactos) {
     chip.textContent = KPI_LABELS[k] + ': ' + signo(delta);
     impactsDiv.appendChild(chip);
   });
-  document.getElementById('modal-feedback').innerHTML = historial[historial.length - 1].feedback;
+  const h = h_actual();
+  document.getElementById('modal-feedback').innerHTML = h.feedback;
   document.getElementById('modal-backdrop').style.display = 'flex';
   renderKPIs();
   guardarEstadoJuego();
+  const d = escenario.dilemas[dilemmaIndex];
+  const analisis = analizarDecision(impactos, kpisAntes);
+  h.analisis = { tipo: analisis.tipo, tipoLabel: analisis.tipoLabel, lectura: analisis.lectura, notaCtx: analisis.notaCtx };
+  renderAnalisisModal(d, impactos, analisis);
+  analizarConIA(h.eleccion, impactos, kpisAntes, kpis, analisis).then(ia => {
+    if (ia && document.getElementById('modal-backdrop').style.display !== 'none') {
+      h.analisis.ia = ia;
+      const box = document.getElementById('ia-veredicto');
+      if (box) {
+        box.innerHTML = '<div class="debrief-analisis">' +
+          '<p><b style="color:#00f2fe">🤖 Análisis del profesor (IA):</b> ' + (ia.veredicto || '') + '</p>' +
+          '<p><b style="color:#f59e0b">⚖️ ¿Era la ideal?</b> ' + (ia.ideal_bajo_contexto || '') + '</p>' +
+          '<p><b style="color:#22c55e">🧠 Lección:</b> ' + (ia.leccion || '') + '</p></div>';
+      }
+    }
+  });
 }
 
 document.getElementById('modal-btn').addEventListener('click', () => {
@@ -1181,6 +1342,19 @@ function mostrarDebrief(estado, kpiFatal) {
     const p = document.createElement('p');
     p.innerHTML = h.feedback;
     item.appendChild(p);
+    if (h.analisis) {
+      const an = document.createElement('div');
+      an.className = 'debrief-analisis';
+      let aHtml = '<span class="tipo-chip ' + h.analisis.tipo + '">' + h.analisis.tipoLabel + '</span>' +
+        '<p>' + h.analisis.lectura + '</p><p>' + h.analisis.notaCtx + '</p>';
+      if (h.analisis.ia) {
+        aHtml += '<p><b style="color:#00f2fe">🤖 Profesor (IA):</b> ' + h.analisis.ia.veredicto + '</p>' +
+          '<p><b style="color:#f59e0b">⚖️ ¿Era la ideal?:</b> ' + h.analisis.ia.ideal_bajo_contexto + '</p>' +
+          '<p><b style="color:#22c55e">🧠 Lección:</b> ' + h.analisis.ia.leccion + '</p>';
+      }
+      an.innerHTML = aHtml;
+      item.appendChild(an);
+    }
     list.appendChild(item);
   });
   document.getElementById('screen-debrief').style.display = 'block';
