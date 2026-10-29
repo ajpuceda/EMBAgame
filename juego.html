@@ -3,113 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>EMBA Game — Motor de Decisiones Estratégicas</title>
-<style>
-  .objetivo-bar {
-    width: 100%;
-    max-width: 960px;
-    margin: 10px auto 0;
-    padding: 10px 16px;
-    background: rgba(0,242,254,.06);
-    border: 1px solid rgba(0,242,254,.35);
-    border-radius: 10px;
-    font-size: .85rem;
-    color: #e2e8f0;
-    line-height: 1.5;
-  }
-  .objetivo-bar b { color: #00f2fe; }
-  .kpi .proj { font-size: .68rem; color: #94a3b8; margin-top: 4px; min-height: 1em; }
-  .kpi .proj.up { color: #22c55e; }
-  .kpi .proj.down { color: #ef4444; }
-  .overlay-backdrop {
-    position: fixed;
-    inset: 0;
-    background: rgba(4,8,20,.82);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 20px;
-    z-index: 60;
-  }
-  .overlay {
-    background: #161f38;
-    border: 1px solid #00f2fe;
-    border-radius: 16px;
-    max-width: 640px;
-    width: 100%;
-    padding: 30px;
-    box-shadow: 0 0 40px rgba(0,242,254,.22);
-    max-height: 90vh;
-    overflow-y: auto;
-  }
-  .overlay h2 { color: #00f2fe; margin-bottom: 14px; letter-spacing: .5px; font-size: 1.35rem; text-align: center; }
-  .overlay p, .modal p { line-height: 1.65; font-size: .92rem; margin-bottom: 12px; }
-  .overlay ul { margin: 0 0 14px 18px; line-height: 1.7; font-size: .9rem; color: #cbd5e1; }
-  .overlay .api-box {
-    background: #0f1730;
-    border: 1px solid #2b3a63;
-    border-radius: 12px;
-    padding: 16px;
-    margin: 14px 0;
-  }
-  .overlay .api-box label { display: block; font-size: .8rem; color: #94a3b8; margin-bottom: 8px; }
-  .overlay input[type=password] {
-    width: 100%;
-    background: #0a0f1d;
-    border: 1px solid #2b3a63;
-    border-radius: 8px;
-    padding: 12px 14px;
-    color: #e2e8f0;
-    font-size: .9rem;
-    font-family: inherit;
-  }
-  .overlay input:focus { outline: none; border-color: #00f2fe; }
-  .btn-ghost { background: transparent !important; color: #00f2fe !important; border: 1px solid #00f2fe !important; }
-  .btn-ghost:hover { background: rgba(0,242,254,.08) !important; }
-  .btn-row { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; margin-top: 22px; }
-  .slider-box { background: #0f1730; border: 1px solid #2b3a63; border-radius: 12px; padding: 22px; }
-  .slider-labels { display: flex; justify-content: space-between; font-size: .82rem; color: #94a3b8; margin-bottom: 10px; gap: 10px; }
-  .slider-labels b { color: #00f2fe; }
-  input[type=range] {
-    width: 100%;
-    -webkit-appearance: none;
-    appearance: none;
-    height: 6px;
-    border-radius: 3px;
-    background: linear-gradient(90deg, #00f2fe, #2b3a63);
-    outline: none;
-    cursor: pointer;
-  }
-  input[type=range]::-webkit-slider-thumb {
-    -webkit-appearance: none;
-    appearance: none;
-    width: 22px; height: 22px;
-    border-radius: 50%;
-    background: #00f2fe;
-    border: 3px solid #0a0f1d;
-    box-shadow: 0 0 10px rgba(0,242,254,.6);
-  }
-  input[type=range]::-moz-range-thumb {
-    width: 22px; height: 22px; border-radius: 50%;
-    background: #00f2fe; border: 3px solid #0a0f1d;
-  }
-  .slider-readout { text-align: center; margin: 14px 0 4px; font-size: .9rem; color: #e2e8f0; }
-  .slider-readout b { color: #00f2fe; font-size: 1.15rem; }
-  .teoria-list { list-style: none; margin: 16px 0; }
-  .teoria-list li { padding: 12px 0 12px 30px; position: relative; line-height: 1.65; font-size: .95rem; border-bottom: 1px solid #232f52; }
-  .teoria-list li::before { content: '◆'; position: absolute; left: 4px; color: #00f2fe; }
-  .debrief-item { background: #0f1730; border: 1px solid #2b3a63; border-left: 3px solid #00f2fe; border-radius: 12px; padding: 18px 20px; margin-bottom: 14px; }
-  .debrief-item h4 { color: #00f2fe; font-size: .9rem; margin-bottom: 8px; line-height: 1.5; }
-  .debrief-item .debrief-concept { font-size: .85rem; color: #94a3b8; margin-bottom: 6px; }
-  .debrief-item p { font-size: .9rem; line-height: 1.6; }
-  .loading-text { text-align: center; color: #00f2fe; padding: 40px 0; font-size: 1rem; letter-spacing: 1px; }
-  .spin {
-    display: inline-block; width: 26px; height: 26px; margin-right: 10px; vertical-align: middle;
-    border: 3px solid rgba(0,242,254,.25); border-top-color: #00f2fe; border-radius: 50%;
-    animation: spin 1s linear infinite;
-  }
-  @keyframes spin { to { transform: rotate(360deg); } }
-</style>
+<title>Nimbus Dynamics — Simulador EMBA</title>
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; }
   body {
@@ -121,151 +15,175 @@
     flex-direction: column;
     align-items: center;
   }
-  .header {
-    width: 100%;
-    max-width: 960px;
-    padding: 24px 20px 8px;
-    text-align: center;
+  .header { width: 100%; max-width: 980px; padding: 20px 20px 6px; text-align: center; }
+  .header h1 { font-size: 1.22rem; font-weight: 600; letter-spacing: .4px; line-height: 1.45; }
+  .header h1 span { color: #00f2fe; }
+  .company-strip {
+    display: flex; flex-wrap: wrap; gap: 6px 16px; justify-content: center;
+    color: #94a3b8; font-size: .77rem; margin-top: 8px;
   }
-  .header h1 {
-    font-size: 1.35rem;
-    font-weight: 600;
-    letter-spacing: .5px;
+  .company-strip b { color: #e2e8f0; font-weight: 600; }
+  .company-strip .fase { color: #00f2fe; }
+  .objetivo-bar {
+    width: 100%; max-width: 980px; margin: 10px auto 0;
+    padding: 10px 16px;
+    background: rgba(0,242,254,.06);
+    border: 1px solid rgba(0,242,254,.35);
+    border-radius: 10px;
+    font-size: .82rem; color: #e2e8f0; line-height: 1.55;
   }
-  .header .modulo {
-    color: #00f2fe;
-    font-size: .8rem;
-    letter-spacing: 2px;
-    text-transform: uppercase;
-    margin-top: 6px;
-  }
-  .header .stage-meta {
-    color: #94a3b8;
-    font-size: .8rem;
-    margin-top: 6px;
-    line-height: 1.6;
-  }
+  .objetivo-bar b { color: #00f2fe; }
+  .objetivo-bar .regla-roja { color: #f87171; }
   .kpis {
-    width: 100%;
-    max-width: 960px;
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 12px;
-    padding: 14px 20px 20px;
+    width: 100%; max-width: 980px;
+    display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px;
+    padding: 14px 20px 18px;
   }
   .kpi {
-    background: #161f38;
-    border: 1px solid #232f52;
-    border-radius: 12px;
-    padding: 14px 10px;
-    text-align: center;
-    transition: border-color .3s;
+    background: #161f38; border: 1px solid #232f52; border-radius: 12px;
+    padding: 13px 10px; text-align: center; transition: border-color .3s;
   }
-  .kpi.low { border-color: #ef4444; box-shadow: 0 0 14px rgba(239,68,68,.2); }
-  .kpi .label { font-size: .72rem; color: #94a3b8; margin-bottom: 6px; }
-  .kpi .value { font-size: 1.5rem; font-weight: 700; color: #00f2fe; }
+  .kpi.warn { border-color: #f59e0b; box-shadow: 0 0 12px rgba(245,158,11,.15); }
+  .kpi.low { border-color: #ef4444; box-shadow: 0 0 14px rgba(239,68,68,.25); }
+  .kpi .label { font-size: .7rem; color: #94a3b8; margin-bottom: 5px; }
+  .kpi .value { font-size: 1.45rem; font-weight: 700; color: #00f2fe; }
+  .kpi.warn .value { color: #f59e0b; }
   .kpi.low .value { color: #ef4444; }
-  .screen { width: 100%; max-width: 960px; padding: 0 20px 40px; }
+  .kpi .streak { font-size: .68rem; margin-top: 4px; min-height: 1.05em; color: #94a3b8; }
+  .kpi .streak.alerta { color: #f87171; font-weight: 700; }
+  .screen { width: 100%; max-width: 980px; padding: 0 20px 36px; }
   .card {
-    background: #161f38;
-    border: 1px solid #232f52;
-    border-radius: 16px;
-    padding: 28px;
-    margin-bottom: 18px;
+    background: #161f38; border: 1px solid #232f52; border-radius: 16px;
+    padding: 26px; margin-bottom: 16px;
   }
   .dilemma-tag {
-    display: inline-block;
-    background: rgba(0,242,254,.1);
-    color: #00f2fe;
-    border: 1px solid rgba(0,242,254,.4);
-    border-radius: 999px;
-    padding: 4px 14px;
-    font-size: .75rem;
-    letter-spacing: 1px;
-    margin-bottom: 16px;
+    display: inline-block; background: rgba(0,242,254,.1); color: #00f2fe;
+    border: 1px solid rgba(0,242,254,.4); border-radius: 999px;
+    padding: 4px 14px; font-size: .74rem; letter-spacing: 1px; margin-bottom: 14px;
   }
-  .narrative { font-size: 1rem; line-height: 1.7; color: #e2e8f0; margin-bottom: 22px; }
-  .options { display: flex; flex-direction: column; gap: 14px; }
+  .narrative { font-size: .97rem; line-height: 1.7; color: #e2e8f0; margin-bottom: 20px; }
+  .options { display: flex; flex-direction: column; gap: 12px; }
   .option {
-    background: #0f1730;
-    border: 1px solid #2b3a63;
-    border-radius: 12px;
-    padding: 18px 20px;
-    text-align: left;
-    color: #e2e8f0;
-    font-size: .95rem;
-    line-height: 1.55;
-    cursor: pointer;
+    background: #0f1730; border: 1px solid #2b3a63; border-radius: 12px;
+    padding: 16px 18px; text-align: left; color: #e2e8f0;
+    font-size: .92rem; line-height: 1.55; cursor: pointer;
     transition: border-color .2s, transform .15s, background .2s;
     font-family: inherit;
   }
   .option:hover { border-color: #00f2fe; transform: translateY(-2px); background: #111c3a; }
-  .modal-backdrop {
-    position: fixed;
-    inset: 0;
-    background: rgba(4,8,20,.78);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 20px;
-    z-index: 50;
+  .option.sel { border-color: #00f2fe; background: #111c3a; box-shadow: 0 0 12px rgba(0,242,254,.2); }
+  .dual-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 14px; }
+  .dual-card {
+    background: #0f1730; border: 1px solid #2b3a63; border-radius: 12px; padding: 16px;
   }
-  .modal {
-    background: #161f38;
-    border: 1px solid #00f2fe;
-    border-radius: 16px;
-    max-width: 580px;
-    width: 100%;
-    padding: 26px;
+  .dual-card h4 { color: #00f2fe; font-size: .85rem; margin-bottom: 4px; }
+  .dual-card .dual-mod { font-size: .7rem; color: #94a3b8; margin-bottom: 12px; letter-spacing: 1px; text-transform: uppercase; }
+  .dual-card .options { gap: 8px; }
+  .dual-card .option { font-size: .85rem; padding: 12px 14px; }
+  .slider-box { background: #0f1730; border: 1px solid #2b3a63; border-radius: 12px; padding: 22px; }
+  .slider-varname { text-align: center; font-size: .8rem; color: #94a3b8; margin-bottom: 6px; }
+  .slider-varname b { color: #e2e8f0; }
+  .slider-labels { display: flex; justify-content: space-between; font-size: .8rem; color: #94a3b8; margin-bottom: 8px; gap: 10px; }
+  .slider-labels b { color: #00f2fe; }
+  input[type=range] {
+    width: 100%; -webkit-appearance: none; appearance: none;
+    height: 8px; border-radius: 4px; outline: none; cursor: pointer;
+    background: linear-gradient(90deg, #2b3a63, #00f2fe, #2b3a63);
+  }
+  input[type=range]::-webkit-slider-thumb {
+    -webkit-appearance: none; appearance: none;
+    width: 22px; height: 22px; border-radius: 50%;
+    background: #00f2fe; border: 3px solid #0a0f1d;
+    box-shadow: 0 0 10px rgba(0,242,254,.6);
+  }
+  input[type=range]::-moz-range-thumb {
+    width: 22px; height: 22px; border-radius: 50%;
+    background: #00f2fe; border: 3px solid #0a0f1d;
+  }
+  .slider-ticks { display: flex; justify-content: space-between; font-size: .68rem; color: #64748b; margin-top: 6px; }
+  .slider-zonas { display: flex; justify-content: space-between; gap: 6px; margin-top: 10px; font-size: .68rem; color: #94a3b8; text-align: center; }
+  .slider-zonas span { flex: 1; border-top: 2px solid #2b3a63; padding-top: 5px; }
+  .slider-readout { text-align: center; margin: 12px 0 2px; font-size: .88rem; color: #e2e8f0; }
+  .slider-readout b { color: #00f2fe; font-size: 1.1rem; }
+  .analistas { margin-top: 18px; }
+  .analistas h5 { color: #00f2fe; font-size: .78rem; letter-spacing: 1px; margin-bottom: 10px; }
+  .analista-chart { background: #0a0f1d; border: 1px solid #232f52; border-radius: 10px; padding: 12px; margin-bottom: 12px; }
+  .chart-legend { display: flex; gap: 16px; font-size: .68rem; color: #94a3b8; margin-top: 6px; flex-wrap: wrap; }
+  .chart-legend i { display: inline-block; width: 16px; height: 3px; vertical-align: middle; margin-right: 5px; border-radius: 2px; }
+  .analista-quote {
+    border-left: 3px solid #00f2fe; background: #0a0f1d; border-radius: 0 8px 8px 0;
+    padding: 10px 12px; margin-bottom: 8px; font-size: .8rem; color: #cbd5e1; line-height: 1.55;
+  }
+  .analista-quote b { color: #e2e8f0; }
+  .overlay-backdrop, .modal-backdrop {
+    position: fixed; inset: 0; background: rgba(4,8,20,.82);
+    display: flex; align-items: center; justify-content: center;
+    padding: 20px; z-index: 60;
+  }
+  .modal, .overlay {
+    background: #161f38; border: 1px solid #00f2fe; border-radius: 16px;
+    max-width: 660px; width: 100%; padding: 30px;
     box-shadow: 0 0 40px rgba(0,242,254,.22);
+    max-height: 90vh; overflow-y: auto;
   }
-  .modal h3 { color: #00f2fe; margin-bottom: 12px; font-size: 1.05rem; letter-spacing: .5px; }
-  .modal p { line-height: 1.65; font-size: .93rem; margin-bottom: 10px; }
-  .impacts { margin: 14px 0; display: flex; flex-wrap: wrap; gap: 8px; }
-  .impact { border-radius: 999px; padding: 5px 12px; font-size: .8rem; font-weight: 600; border: 1px solid; }
+  .overlay h2 { color: #00f2fe; margin-bottom: 14px; letter-spacing: .5px; font-size: 1.28rem; text-align: center; }
+  .modal h3, .overlay h3 { color: #00f2fe; margin-bottom: 12px; letter-spacing: .5px; }
+  .modal p, .overlay p { line-height: 1.65; font-size: .92rem; margin-bottom: 12px; }
+  .overlay ul { margin: 0 0 14px 18px; line-height: 1.7; font-size: .9rem; color: #cbd5e1; }
+  .overlay .api-box { background: #0f1730; border: 1px solid #2b3a63; border-radius: 12px; padding: 16px; margin: 14px 0; }
+  .overlay .api-box label { display: block; font-size: .8rem; color: #94a3b8; margin-bottom: 8px; }
+  .overlay input[type=password] {
+    width: 100%; background: #0a0f1d; border: 1px solid #2b3a63; border-radius: 8px;
+    padding: 12px 14px; color: #e2e8f0; font-size: .9rem; font-family: inherit;
+  }
+  .overlay input:focus { outline: none; border-color: #00f2fe; }
+  .impacts { margin: 12px 0; display: flex; flex-wrap: wrap; gap: 8px; }
+  .impact { border-radius: 999px; padding: 5px 12px; font-size: .78rem; font-weight: 600; border: 1px solid; }
   .impact.up { color: #22c55e; border-color: rgba(34,197,94,.5); background: rgba(34,197,94,.08); }
   .impact.down { color: #ef4444; border-color: rgba(239,68,68,.5); background: rgba(239,68,68,.08); }
-  .modal button {
-    margin-top: 8px;
-    background: #00f2fe;
-    color: #0a0f1d;
-    border: none;
-    border-radius: 10px;
-    padding: 12px 22px;
-    font-weight: 700;
-    font-size: .9rem;
-    cursor: pointer;
-    font-family: inherit;
+  .modal button, .overlay button, .btn-main {
+    background: #00f2fe; color: #0a0f1d; border: none; border-radius: 10px;
+    padding: 13px 24px; font-weight: 700; font-size: .9rem; cursor: pointer;
+    font-family: inherit; transition: background .2s;
   }
-  .modal button:hover { background: #6ff7ff; }
-  .result-title { font-size: 2rem; font-weight: 800; text-align: center; margin-bottom: 18px; letter-spacing: 1px; }
-  .result-title.win { color: #22c55e; text-shadow: 0 0 24px rgba(34,197,94,.4); }
-  .result-title.lose { color: #ef4444; text-shadow: 0 0 24px rgba(239,68,68,.4); }
-  .lessons { list-style: none; margin: 14px 0 4px; }
-  .lessons li { padding: 10px 0 10px 26px; position: relative; line-height: 1.6; font-size: .93rem; border-bottom: 1px solid #232f52; }
-  .lessons li::before { content: '✓'; position: absolute; left: 0; color: #00f2fe; font-weight: 700; }
-  .final-kpis { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin: 18px 0; }
-  .btn-main {
-    display: block;
-    margin: 22px auto 0;
-    background: #00f2fe;
-    color: #0a0f1d;
-    border: none;
-    border-radius: 12px;
-    padding: 14px 30px;
-    font-weight: 700;
-    font-size: 1rem;
-    cursor: pointer;
-    font-family: inherit;
-    transition: background .2s;
-  }
-  .btn-main:hover { background: #6ff7ff; }
+  .modal button:hover, .overlay button:hover, .btn-main:hover { background: #6ff7ff; }
+  .btn-main:disabled { opacity: .35; cursor: not-allowed; }
   .btn-main.btn-retry { background: #ef4444; color: #fff; }
   .btn-main.btn-retry:hover { background: #ff6b6b; }
-  .status-line { text-align: center; color: #94a3b8; font-size: .8rem; margin-top: 12px; min-height: 1.2em; }
-  @media (max-width: 640px) {
+  .btn-main.btn-ghost { background: transparent; color: #00f2fe; border: 1px solid #00f2fe; }
+  .btn-main.btn-ghost:hover { background: rgba(0,242,254,.08); }
+  .result-title { font-size: 1.8rem; font-weight: 800; text-align: center; margin-bottom: 16px; letter-spacing: 1px; }
+  .result-title.win { color: #22c55e; text-shadow: 0 0 24px rgba(34,197,94,.4); }
+  .result-title.lose { color: #ef4444; text-shadow: 0 0 24px rgba(239,68,68,.4); }
+  .lessons { list-style: none; margin: 12px 0 4px; }
+  .lessons li { padding: 10px 0 10px 26px; position: relative; line-height: 1.6; font-size: .92rem; border-bottom: 1px solid #232f52; }
+  .lessons li::before { content: '✓'; position: absolute; left: 0; color: #00f2fe; font-weight: 700; }
+  .final-kpis { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin: 16px 0; }
+  .teoria-list { list-style: none; margin: 14px 0; }
+  .teoria-list li { padding: 12px 0 12px 30px; position: relative; line-height: 1.65; font-size: .94rem; border-bottom: 1px solid #232f52; }
+  .teoria-list li::before { content: '◆'; position: absolute; left: 4px; color: #00f2fe; }
+  .situacion {
+    background: #0f1730; border: 1px solid #2b3a63; border-left: 3px solid #00f2fe;
+    border-radius: 0 10px 10px 0; padding: 12px 14px; margin: 14px 0;
+    font-size: .86rem; color: #cbd5e1; line-height: 1.65;
+  }
+  .debrief-item { background: #0f1730; border: 1px solid #2b3a63; border-left: 3px solid #00f2fe; border-radius: 12px; padding: 16px 18px; margin-bottom: 12px; }
+  .debrief-item h4 { color: #00f2fe; font-size: .88rem; margin-bottom: 8px; line-height: 1.5; }
+  .debrief-item .debrief-concept { font-size: .82rem; color: #94a3b8; margin-bottom: 6px; }
+  .debrief-item p { font-size: .88rem; line-height: 1.6; }
+  .btn-row { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; margin-top: 20px; }
+  .status-line { text-align: center; color: #94a3b8; font-size: .78rem; margin-top: 12px; min-height: 1.2em; }
+  .loading-text { text-align: center; color: #00f2fe; padding: 40px 0; font-size: 1rem; letter-spacing: 1px; }
+  .spin {
+    display: inline-block; width: 26px; height: 26px; margin-right: 10px; vertical-align: middle;
+    border: 3px solid rgba(0,242,254,.25); border-top-color: #00f2fe; border-radius: 50%;
+    animation: spin 1s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  @media (max-width: 700px) {
     .kpis, .final-kpis { grid-template-columns: repeat(2, 1fr); }
-    .header h1 { font-size: 1.05rem; }
+    .dual-grid { grid-template-columns: 1fr; }
+    .header h1 { font-size: 1.02rem; }
   }
 </style>
 </head>
@@ -273,74 +191,74 @@
 
 <div class="overlay-backdrop" id="welcome-overlay">
   <div class="overlay">
-    <h2>🎓 Bienvenido al EMBA Game</h2>
-    <p>Estás a punto de entrar en un <b>simulador de decisiones ejecutivas</b> inspirado en el método del caso de las mejores escuelas de negocio. Aquí no lees teoría: la <b>diriges</b>.</p>
+    <h2>🚀 Nimbus Dynamics — De garaje a multinacional</h2>
+    <p>Diriges <b>Nimbus Dynamics</b>, una startup digital nacida en un garaje. Tu misión: convertirla en una multinacional. A lo largo de <b>100 etapas</b> —una por tema del EMBA— vivirás la evolución real de la empresa: cada etapa es un trimestre de tu historia corporativa y <b>tus KPIs se arrastran de una etapa a otra</b>. Las herencias de tus decisiones se acumulan: no hay resets entre niveles.</p>
     <ul>
-      <li><b>Qué es:</b> un plan de estudios EMBA de 100 etapas convertidas en niveles de juego, organizadas en 5 módulos: Estrategia, Finanzas, Marketing, Operaciones y Capital Humano.</li>
-      <li><b>Para qué sirve:</b> entrenar tu criterio directivo. En cada etapa leerás un briefing con la teoría del tema, afrontarás 3 dilemas gestionando KPIs reales (💰 Finanzas, ⚙️ Operaciones, 👥 Talento, 📈 Mercado) y recibirás un informe final que conecta cada decisión con el marco académico que estabas aplicando.</li>
-      <li><b>Cómo se juega:</b> partes del 50% en cada KPI. Toma decisiones (elige opciones o mueve variables de asignación según el dilema) y sobrevive: si un KPI cae a 0%, quedas <b>destituido</b>. Si superas los 3 dilemas, la etapa queda registrada en tu expediente.</li>
-      <li><b>Tu avance</b> se guarda automáticamente y puedes descargarlo como archivo <code>.json</code> o sincronizarlo en la nube.</li>
+      <li><b>Módulos rotativos:</b> Estrategia → Finanzas → Marketing → Operaciones → Capital Humano → y vuelta a empezar. Cada etapa pone a prueba un tema distinto con su briefing teórico.</li>
+      <li><b>Problemas complejos:</b> dilemas con 3-4 opciones neutras, decisiones dobles que combinan dos módulos a la vez, y asignaciones de recursos con barra. Los impactos de la barra están ocultos: te orientan informes de analistas que rara vez coinciden.</li>
+      <li><b>🎯 Reglas de supervivencia:</b> mantén los 4 KPIs (💰 Finanzas, ⚙️ Operaciones, 👥 Capital Humano, 📈 Mercado) <b>por encima del 35%</b> en todo momento, y evita que cualquiera pase <b class="regla-roja">3 rondas seguidas por debajo del 40%</b>.</li>
+      <li><b>Educativo:</b> antes de cada etapa lees el briefing teórico; al terminar, un informe conecta cada decisión con el marco académico que estabas aplicando.</li>
     </ul>
     <div class="api-box">
-      <label for="api-key-input">🔑 Clave API de Mistral (opcional) — genera cada etapa con IA: teoría, dilemas y escenarios frescos en cada partida. Se guarda solo en este navegador. Si no la introduces, el motor usará su generador interno.</label>
+      <label for="api-key-input">🔑 Clave API de Mistral (opcional) — genera cada etapa con IA: teoría, dilemas y escenarios frescos en cada partida. Se guarda solo en este navegador. Sin clave, el motor usa su generador interno.</label>
       <input type="password" id="api-key-input" placeholder="sk-… (déjalo vacío para usar el generador interno)">
     </div>
     <div class="btn-row">
-      <button class="btn-main" id="btn-start">Comenzar mi etapa</button>
+      <button class="btn-main" id="btn-start">Fundar y empezar</button>
     </div>
     <div class="status-line" id="welcome-status"></div>
   </div>
 </div>
 
 <div class="header" id="app-header" style="display:none;">
-  <h1 id="stage-title">Cargando escenario ejecutivo…</h1>
-  <div class="modulo" id="stage-modulo"></div>
-  <div class="stage-meta" id="stage-meta"></div>
+  <h1 id="stage-title"></h1>
+  <div class="company-strip" id="company-strip"></div>
 </div>
-
 <div class="objetivo-bar" id="objetivo-bar" style="display:none;"></div>
 
 <div class="kpis" id="kpis-panel" style="display:none;">
   <div class="kpi" id="kpi-finanzas">
     <div class="label">💰 Finanzas</div>
     <div class="value" id="val-finanzas">50%</div>
-    <div class="proj" id="proj-finanzas"></div>
+    <div class="streak" id="streak-finanzas"></div>
   </div>
   <div class="kpi" id="kpi-operaciones">
     <div class="label">⚙️ Operaciones</div>
     <div class="value" id="val-operaciones">50%</div>
-    <div class="proj" id="proj-operaciones"></div>
+    <div class="streak" id="streak-operaciones"></div>
   </div>
   <div class="kpi" id="kpi-talento">
     <div class="label">👥 Capital Humano</div>
     <div class="value" id="val-talento">50%</div>
-    <div class="proj" id="proj-talento"></div>
+    <div class="streak" id="streak-talento"></div>
   </div>
   <div class="kpi" id="kpi-mercado">
-    <div class="label">📈 Mercado y Reputación</div>
+    <div class="label">📈 Mercado</div>
     <div class="value" id="val-mercado">50%</div>
-    <div class="proj" id="proj-mercado"></div>
+    <div class="streak" id="streak-mercado"></div>
   </div>
 </div>
 
 <div class="screen">
-  <div id="screen-loading" style="display:none;"><div class="card"><p class="loading-text"><span class="spin"></span><span id="loading-msg">Generando escenario ejecutivo…</span></p></div></div>
+  <div id="screen-loading" style="display:none;"><div class="card"><p class="loading-text"><span class="spin"></span><span id="loading-msg">Generando trimestre…</span></p></div></div>
 
   <div id="screen-teoria" style="display:none;">
     <div class="card">
       <span class="dilemma-tag">📖 Briefing académico previo</span>
       <h3 style="color:#00f2fe; margin-bottom:6px;" id="teoria-tema"></h3>
-      <p class="narrative" id="teoria-intro" style="margin-bottom:10px;"></p>
+      <div class="situacion" id="teoria-situacion"></div>
+      <p class="narrative" id="teoria-intro" style="margin-bottom:8px;"></p>
       <ul class="teoria-list" id="teoria-list"></ul>
-      <div class="btn-row"><button class="btn-main" id="btn-go-dilemmas">He entendido la teoría — afrontar los dilemas</button></div>
+      <div class="btn-row"><button class="btn-main" id="btn-go-dilemmas">Afrontar el trimestre</button></div>
     </div>
   </div>
 
-  <div id="screen-game">
+  <div id="screen-game" style="display:none;">
     <div class="card" id="dilemma-card">
-      <span class="dilemma-tag" id="dilemma-tag">Dilema 1 de 3</span>
+      <span class="dilemma-tag" id="dilemma-tag"></span>
       <p class="narrative" id="dilemma-narrative"></p>
-      <div class="options" id="options-container"></div>
+      <div id="options-container"></div>
+      <div id="dual-container" style="display:none;"></div>
       <div id="slider-container" style="display:none;"></div>
     </div>
   </div>
@@ -349,7 +267,7 @@
     <div class="card">
       <span class="dilemma-tag">🧠 Informe de aprendizaje</span>
       <h3 style="color:#00f2fe; margin-bottom:4px;">La teoría detrás de tus decisiones</h3>
-      <p class="narrative" style="margin-bottom:16px;">Antes de ver el desenlace, revisa qué marco académico se escondía detrás de cada dilema y cómo se aplicaba a tu decisión. Así es como las escuelas de negocio cierran un caso: la decisión importa, pero el patrón que enseña es lo que queda.</p>
+      <p class="narrative" style="margin-bottom:14px;">Antes de ver el desenlace, revisa qué marco académico se escondía detrás de cada decisión y cómo se aplicaba. La decisión importa, pero el patrón que enseña es lo que queda.</p>
       <div id="debrief-list"></div>
       <div class="btn-row"><button class="btn-main" id="btn-go-result">Ver desenlace ejecutivo</button></div>
     </div>
@@ -362,8 +280,9 @@
       <div class="final-kpis" id="final-kpis"></div>
       <ul class="lessons" id="result-lessons"></ul>
       <div class="btn-row">
-        <button class="btn-main btn-retry" id="btn-retry">Reintentar Desafío Ejecutivo</button>
-        <button class="btn-main" id="btn-return">Regresar al Mapa de Ruta</button>
+        <button class="btn-main btn-retry" id="btn-retry">Reintentar trimestre</button>
+        <button class="btn-main" id="btn-next">Continuar a la siguiente etapa ▶</button>
+        <button class="btn-main btn-ghost" id="btn-return">Volver al Mapa de Ruta</button>
         <button class="btn-main btn-ghost" id="btn-export">⬇ Exportar avance (.json)</button>
       </div>
       <div class="status-line" id="sync-status"></div>
@@ -484,13 +403,50 @@ const TEMAS_EMBA = {
     100: { modulo: "Capital Humano", tema: "El Futuro del Trabajo: Modelos Híbridos, Automatización y el CEO" }
 };
 
-const SECTORES = [
-  { nombre: 'Fintech de Microcréditos', empresa: 'Creditia' },
-  { nombre: 'Aeroespacial', empresa: 'AeroLink Industries' },
-  { nombre: 'Biotecnología', empresa: 'BioNexa Therapeutics' },
-  { nombre: 'Logística Automatizada', empresa: 'CargoMind Logistics' },
-  { nombre: 'Energías Renovables', empresa: 'Voltia Renewables' }
+const ORDEN_MODULOS = ['Estrategia', 'Finanzas', 'Marketing', 'Operaciones', 'Capital Humano'];
+const MODULO_ICONO = { 'Estrategia': '♟️', 'Finanzas': '💰', 'Marketing': '📈', 'Operaciones': '⚙️', 'Capital Humano': '👥' };
+
+const FASES = [
+  { desde: 1, hasta: 12, nombre: 'Fase Seed — El garaje', ano: 1, empleados: 8, ingresos: '0,3 M€', mercados: 'una sola ciudad',
+    narrativa: 'Nimbus Dynamics nació en un garaje: un producto prometedor, tres fundadores brillantes y una cuenta corriente que da miedo. Cada decisión pesa el doble cuando no hay colchón.' },
+  { desde: 13, hasta: 28, nombre: 'Fase Scale-up — Crecimiento vertiginoso', ano: 3, empleados: 48, ingresos: '4,2 M€', mercados: 'todo el país',
+    narrativa: 'El producto encajó. Ahora la empresa crece más rápido que sus procesos: contratar, producir y cobrar a la vez se ha convertido en el reto diario.' },
+  { desde: 29, hasta: 48, nombre: 'Fase Expansión — Dominio del mercado nacional', ano: 5, empleados: 210, ingresos: '38 M€', mercados: 'el país y Portugal',
+    narrativa: 'Nimbus ya es una empresa de referencia nacional. Los competidores grandes han dejado de ignorarla y empiezan a copiarla. Escalar con disciplina es la nueva batalla.' },
+  { desde: 49, hasta: 72, nombre: 'Fase Internacionalización — Salto global', ano: 8, empleados: 1400, ingresos: '310 M€', mercados: '12 países',
+    narrativa: 'El salto internacional es real: oficinas en tres continentes, culturas distintas y una complejidad que ya no cabe en la cabeza de una sola persona.' },
+  { desde: 73, hasta: 100, nombre: 'Fase Multinacional — Consolidación global', ano: 12, empleados: 9500, ingresos: '2.400 M€', mercados: '44 países',
+    narrativa: 'Nimbus Dynamics es una multinacional. El reto ya no es crecer: es no volverse lenta, burocrática o arrogante manteniendo el tamaño.' }
 ];
+
+const TEORIA_MODULO = {
+  'Estrategia': { intro: 'Estrategia: dónde competimos y cómo ganamos de forma sostenible.', puntos: [
+    'La ventaja competitiva nace de elegir una posición distinta, no de hacer lo mismo un poco mejor.',
+    'Toda estrategia real implica trade-offs: renunciar a algo para ser insuperable en otra cosa.',
+    'El entorno define los límites del juego; la estrategia define cómo juegas dentro de ellos.',
+    'Crecer y transformar sin destruir la organización es tan estratégico como elegir el mercado.' ] },
+  'Finanzas': { intro: 'Finanzas: cada decisión de negocio traducida a caja, rentabilidad y riesgo.', puntos: [
+    'La caja es oxígeno: se puede quebrar siendo rentable y sobrevivir con pérdidas si hay liquidez.',
+    'El coste de capital (WACC) mide si un proyecto crea o destruye valor.',
+    'El apalancamiento multiplica resultados en ambas direcciones.',
+    'Los sesgos conductuales distorsionan decisiones incluso con buenos números delante.' ] },
+  'Marketing': { intro: 'Marketing: conectar la estrategia con el cliente — quién es, qué valora y por qué te elige.', puntos: [
+    'No existe "el cliente": existe un segmento con necesidad y disposición a pagar concretas.',
+    'El valor percibido fija el techo del precio; el coste fija el suelo de la supervivencia.',
+    'Adquirir clientes (CAC) solo tiene sentido si su valor de vida (CLV) lo supera.',
+    'La marca reduce el coste de la elección: menos fricción, más fidelidad, más margen.' ] },
+  'Operaciones': { intro: 'Operaciones: ejecutar de forma impecable — la estrategia sin ejecución es solo una intención.', puntos: [
+    'Todo sistema tiene un cuello de botella: optimizar otra cosa no acelera el proceso.',
+    'El desperdicio (Muda) es todo lo que consume recursos sin crear valor.',
+    'La eficiencia y la resiliencia compiten: las cadenas sobre-optimizadas se rompen al primer golpe.',
+    'La tecnología solo genera ventaja cuando rediseña el proceso, no cuando se superpone al caos.' ] },
+  'Capital Humano': { intro: 'Capital Humano: las organizaciones no ejecutan estrategias — las ejecutan las personas.', puntos: [
+    'La cultura es lo que ocurre cuando nadie mira: la ventaja más difícil de copiar.',
+    'El talento se retiene con propósito, desarrollo y coherencia, no solo con dinero.',
+    'Los sistemas de incentivos enseñan más que los discursos: se obtiene lo que se premia.',
+    'El liderazgo en crisis es gestión del significado: dirección y calma ante la incertidumbre.' ] }
+};
+
 const CONTEXTOS = [
   'Alta inflación con subida de tipos',
   'Recesión inminente',
@@ -498,81 +454,67 @@ const CONTEXTOS = [
   'Proteccionismo comercial'
 ];
 const EVENTOS = [
-  'Un competidor agresivo copia el producto y lo lanza a un 40% menos de precio',
-  'Nueva regulación gubernamental estricta que recorta márgenes y exige auditorías trimestrales',
-  'Filtración masiva de datos de clientes que salpica a toda la industria',
-  'Huelga en la cadena de distribución que paraliza el 30% de las entregas'
+  'un competidor bien financiado lanza un producto equivalente',
+  'el regulador anuncia nueva normativa estricta para el sector',
+  'una filtración de datos salpica a toda la industria',
+  'la cadena de distribución sufre una huelga que retrasa entregas clave',
+  'un cliente mayoritario amenaza con irse si no mejoras las condiciones',
+  'un fondo de inversión ofrece capital fresco con condiciones agresivas'
 ];
 
 const KPI_KEYS = ['finanzas', 'operaciones', 'talento', 'mercado'];
-const KPI_LABELS = {
-  finanzas: '💰 Finanzas',
-  operaciones: '⚙️ Operaciones',
-  talento: '👥 Capital Humano',
-  mercado: '📈 Mercado'
-};
-const KPI_LABELS_CORTOS = {
-  finanzas: 'Finanzas', operaciones: 'Operaciones', talento: 'Capital Humano', mercado: 'Mercado'
-};
-
-const TEORIA_MODULO = {
-  'Estrategia': {
-    intro: 'El módulo de Estrategia responde a la pregunta decisiva de cualquier empresa: ¿dónde competimos y cómo ganamos de forma sostenible?',
-    puntos: [
-      'La ventaja competitiva nace de elegir una posición distinta, no de hacer lo mismo que los rivales un poco mejor.',
-      'Toda estrategia real implica trade-offs: renunciar a algo para ser insuperable en otra cosa.',
-      'El entorno (competidores, regulación, tecnología) define los límites del juego; la estrategia define cómo juegas dentro de ellos.',
-      'Crecer y transformar sin destruir la organización es tan estratégico como elegir el mercado.'
-    ]
-  },
-  'Finanzas': {
-    intro: 'El módulo de Finanzas convierte cada decisión de negocio en su impacto sobre caja, rentabilidad y riesgo.',
-    puntos: [
-      'La caja es oxígeno: una empresa rentable puede quebrar por falta de liquidez, y una en pérdidas puede sobrevivir con caja.',
-      'El coste de capital (WACC) es la vara con la que se mide si un proyecto crea o destruye valor.',
-      'El apalancamiento multiplica resultados en ambas direcciones: acelera el crecimiento y agrava la caída.',
-      'Los sesgos conductuales (exceso de confianza, aversión a la pérdida) distorsionan decisiones incluso con buenos números delante.'
-    ]
-  },
-  'Marketing': {
-    intro: 'El módulo de Marketing conecta la estrategia con el cliente: quién es, qué valora y por qué te elige a ti.',
-    puntos: [
-      'No existe "el cliente": existe un segmento concreto con una necesidad y una disposición a pagar concretas.',
-      'El valor percibido, no el coste, fija el techo del precio; el coste fija el suelo de la supervivencia.',
-      'Adquirir clientes (CAC) solo tiene sentido si su valor a lo largo de la vida (CLV) lo supera con holgura.',
-      'La marca es un activo que reduce el coste de la elección: menos fricción, más fidelidad, más margen.'
-    ]
-  },
-  'Operaciones': {
-    intro: 'El módulo de Operaciones trata de ejecutar de forma impecable: la estrategia sin ejecución es solo una intención.',
-    puntos: [
-      'Todo sistema tiene un cuello de botella: optimizar cualquier otra cosa no acelera el proceso completo.',
-      'El desperdicio (Muda) es todo lo que consume recursos sin crear valor para el cliente.',
-      'La eficiencia y la resiliencia compiten: las cadenas mínimamente optimizadas se rompen con el primer golpe externo.',
-      'La tecnología (IA, IoT, automatización) solo genera ventaja cuando rediseña el proceso, no cuando se superpone al caos existente.'
-    ]
-  },
-  'Capital Humano': {
-    intro: 'El módulo de Capital Humano reconoce que las organizaciones no ejecutan estrategias: las ejecutan las personas.',
-    puntos: [
-      'La cultura es lo que ocurre cuando nadie mira: es la ventaja competitiva más difícil de copiar.',
-      'El talento clave no se retiene solo con dinero, sino con propósito, desarrollo y coherencia entre lo que se dice y se hace.',
-      'Los sistemas de incentivos enseñan más que los discursos: se obtiene lo que se premia, no lo que se pide.',
-      'El liderazgo en crisis es gestión del significado: dar dirección y calma cuando la incertidumbre es máxima.'
-    ]
-  }
-};
+const KPI_LABELS = { finanzas: '💰 Finanzas', operaciones: '⚙️ Operaciones', talento: '👥 Capital Humano', mercado: '📈 Mercado' };
+const KPI_LABELS_CORTOS = { finanzas: 'Finanzas', operaciones: 'Operaciones', talento: 'Capital Humano', mercado: 'Mercado' };
+const EMPRESA = 'Nimbus Dynamics';
+const UMBRAL_COLAPSO = 35;
+const UMBRAL_VIGILANCIA = 40;
+const RACHA_MAXIMA = 3;
 
 let escenario = null;
 let kpis = { finanzas: 50, operaciones: 50, talento: 50, mercado: 50 };
+let racha = { finanzas: 0, operaciones: 0, talento: 0, mercado: 0 };
 let dilemmaIndex = 0;
 let gameOver = false;
 let victoria = false;
 let historial = [];
+let estadoInicial = null;
 
-/* ============================================================
-   VENTANA DE BIENVENIDA Y CLAVE API MISTRAL
-   ============================================================ */
+function moduloDeEtapa(n) { return ORDEN_MODULOS[(n - 1) % ORDEN_MODULOS.length]; }
+function temaDeEtapa(n) {
+  const mod = moduloDeEtapa(n);
+  const idx = Math.floor((n - 1) / ORDEN_MODULOS.length);
+  const temas = Object.keys(TEMAS_EMBA).filter(k => TEMAS_EMBA[k].modulo === mod).map(k => TEMAS_EMBA[k]);
+  return temas[idx];
+}
+function faseDeEtapa(n) { return FASES.find(f => n >= f.desde && n <= f.hasta) || FASES[FASES.length - 1]; }
+
+function cargarEstadoJuego() {
+  let e = null;
+  try { e = JSON.parse(localStorage.getItem('emba_estado_juego')); } catch (err) { e = null; }
+  if (!e || !e.kpis) {
+    e = { kpis: { finanzas: 50, operaciones: 50, talento: 50, mercado: 50 },
+          racha: { finanzas: 0, operaciones: 0, talento: 0, mercado: 0 } };
+  }
+  if (!e.racha) e.racha = { finanzas: 0, operaciones: 0, talento: 0, mercado: 0 };
+  KPI_KEYS.forEach(k => {
+    e.kpis[k] = Math.min(100, Math.max(0, Number(e.kpis[k]) || 50));
+    e.racha[k] = Math.max(0, Math.min(RACHA_MAXIMA, Number(e.racha[k]) || 0));
+  });
+  return e;
+}
+
+function guardarEstadoJuego() {
+  localStorage.setItem('emba_estado_juego', JSON.stringify({ kpis: kpis, racha: racha }));
+}
+
+function estabilizarEntreEtapas() {
+  KPI_KEYS.forEach(k => {
+    if (kpis[k] < 50) kpis[k] = Math.min(50, kpis[k] + 3);
+    else if (kpis[k] > 50) kpis[k] = Math.max(50, kpis[k] - 3);
+  });
+  KPI_KEYS.forEach(k => { if (kpis[k] >= UMBRAL_VIGILANCIA) racha[k] = 0; });
+}
+
 document.getElementById('api-key-input').value = localStorage.getItem('emba_mistral_api_key') || '';
 
 document.getElementById('btn-start').addEventListener('click', async () => {
@@ -586,9 +528,6 @@ document.getElementById('btn-start').addEventListener('click', async () => {
   await cargarEtapa(detectarEtapa());
 });
 
-/* ============================================================
-   DETECCIÓN AUTOMÁTICA DE NIVEL
-   ============================================================ */
 function detectarEtapa() {
   const param = new URLSearchParams(window.location.search).get('etapa');
   if (param) {
@@ -606,16 +545,21 @@ function detectarEtapa() {
       const maxima = Math.max.apply(null, progreso.etapas_completadas.filter(n => n >= 1 && n <= 100));
       if (maxima < 100) return maxima + 1;
     }
-  } catch (e) { /* progreso corrupto o inexistente */ }
+  } catch (e) { /* sin progreso */ }
   return 1;
 }
 
-/* ============================================================
-   GENERADOR DINÁMICO DE DILEMAS
-   ============================================================ */
 function rnd(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
 function signo(n) { return n >= 0 ? '+' + n : String(n); }
-function clampI(n) { return Math.max(-25, Math.min(25, Math.round(Number(n) || 0))); }
+function clampI(n) { return Math.max(-12, Math.min(12, Math.round(Number(n) || 0))); }
+function shuffle(arr) {
+  const a = arr.slice();
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    const tmp = a[i]; a[i] = a[j]; a[j] = tmp;
+  }
+  return a;
+}
 
 async function cargarEtapa(etapa) {
   document.getElementById('screen-teoria').style.display = 'none';
@@ -623,19 +567,22 @@ async function cargarEtapa(etapa) {
   document.getElementById('screen-debrief').style.display = 'none';
   document.getElementById('screen-result').style.display = 'none';
   document.getElementById('screen-loading').style.display = 'block';
+  const estado = cargarEstadoJuego();
+  kpis = estado.kpis;
+  racha = estado.racha;
+  estadoInicial = { kpis: Object.assign({}, kpis), racha: Object.assign({}, racha) };
   const key = localStorage.getItem('emba_mistral_api_key');
   let esc = null;
   if (key) {
-    document.getElementById('loading-msg').textContent = 'Generando etapa con IA (Mistral)…';
+    document.getElementById('loading-msg').textContent = 'Generando trimestre con IA (Mistral)…';
     try { esc = await generarEscenarioIA(etapa, key); } catch (e) { esc = null; }
   }
   if (!esc) {
-    document.getElementById('loading-msg').textContent = 'Generando escenario ejecutivo…';
+    document.getElementById('loading-msg').textContent = 'Generando trimestre…';
     await new Promise(r => setTimeout(r, 400));
     esc = generarEscenarioLocal(etapa);
   }
   escenario = esc;
-  kpis = { finanzas: 50, operaciones: 50, talento: 50, mercado: 50 };
   dilemmaIndex = 0;
   gameOver = false;
   victoria = false;
@@ -647,188 +594,249 @@ async function cargarEtapa(etapa) {
 }
 
 async function generarEscenarioIA(etapa, apiKey) {
-  const tema = TEMAS_EMBA[etapa];
-  const sector = rnd(SECTORES);
+  const tema = temaDeEtapa(etapa);
+  const modulo = moduloDeEtapa(etapa);
+  const fase = faseDeEtapa(etapa);
   const contexto = rnd(CONTEXTOS);
   const evento = rnd(EVENTOS);
-  const prompt = 'Eres un diseñador instruccional de una escuela de negocios top (estilo Harvard/INSEAD) y guionista de simuladores ejecutivos. Genera UN nivel de un juego de decisiones estratégicas en JSON estricto (sin markdown), en español, con esta estructura exacta:\n' +
-    '{"teoria": {"intro": "1-2 frases que conecten el tema con la práctica directiva", "puntos": ["4-5 conceptos clave del tema, didácticos y concretos"]}, "objetivo": "1 frase con el objetivo de negocio del nivel, concreto y medible", "dilemas": [ para 2 de los 3 dilemas: {"tipo": "eleccion", "narrativa": "3 frases de mini-historia", "concepto": "marco o teoría concreta que se pone a prueba", "opciones": [{"texto": "decisión ejecutiva", "feedback": "por qué académico y de negocio de las consecuencias, 3-4 frases", "impactos": {"finanzas": -20..20, "operaciones": -20..20, "talento": -20..20, "mercado": -20..20}}, {"texto": "decisión ejecutiva alternativa", "feedback": "...", "impactos": {...}}]} ; para exactamente 1 dilema: {"tipo": "slider", "narrativa": "3 frases: hay que repartir un presupuesto entre dos palancas", "concepto": "marco teórico que se pone a prueba", "etiquetaA": "palanca defensiva", "etiquetaB": "palanca ofensiva", "efectosA": {"finanzas": -20..20, "operaciones": -20..20, "talento": -20..20, "mercado": -20..20}, "efectosB": {...}, "posicionOptima": 0-100, "feedbackOptimo": "cómo se aplica la teoría al equilibrio entre ambas palancas, 3 frases", "feedbackExtremoA": "riesgo de inclinar demasiado a A", "feedbackExtremoB": "riesgo de inclinar demasiado a B"} ]}\n' +
-    'Tema académico obligatorio: "' + tema.tema + '" (módulo: ' + tema.modulo + '). Sector: ' + sector.nombre + ', empresa llamada ' + sector.empresa + '. Contexto macro: ' + contexto + '. Evento detonante: ' + evento + '. Los impactos deben reflejar trade-offs realistas (ninguna opción domina en los 4 KPIs). Devuelve solo el JSON.';
+  const subMod1 = ORDEN_MODULOS[etapa % ORDEN_MODULOS.length];
+  const subMod2 = ORDEN_MODULOS[(etapa + 1) % ORDEN_MODULOS.length];
+  const kpisTxt = 'Finanzas: ' + Math.round(kpis.finanzas) + '%, Operaciones: ' + Math.round(kpis.operaciones) + '%, Capital Humano: ' + Math.round(kpis.talento) + '%, Mercado: ' + Math.round(kpis.mercado) + '%';
+  const prompt = 'Eres diseñador instruccional de una escuela de negocios top (Harvard/INSEAD) y guionista de simuladores ejecutivos. Genera UN trimestre del simulador en JSON estricto (sin markdown), en español. Regla de oro: enunciados y opciones NO pueden dar pistas sobre cuál es la mejor decisión; todas deben sonar igual de razonables con trade-offs reales. Estructura exacta:\n' +
+    '{"teoria": {"intro": "1-2 frases conectando el tema con la práctica directiva", "puntos": ["4-5 conceptos clave del tema, didácticos"]},\n' +
+    '"dilemas": [\n' +
+    ' {"tipo": "eleccion", "narrativa": "3 frases de situación del trimestre", "concepto": "marco teórico concreto que se pone a prueba", "opciones": [4 objetos {"texto": "decisión ejecutiva neutra", "feedback": "explicación didáctica del porqué, 3 frases", "impactos": {"finanzas": -12..12, "operaciones": -12..12, "talento": -12..12, "mercado": -12..12}}]},\n' +
+    ' {"tipo": "slider", "narrativa": "3 frases: reparto de un fondo entre dos palancas", "concepto": "marco", "etiquetaA": "palanca A", "etiquetaB": "palanca B", "efectosA": {"finanzas": -12..12, "operaciones": -12..12, "talento": -12..12, "mercado": -12..12}, "efectosB": {...}, "posicionOptima": 30-70, "feedbackOptimo": "3 frases", "feedbackExtremoA": "riesgo de exceso hacia A", "feedbackExtremoB": "riesgo de exceso hacia B"},\n' +
+    ' {"tipo": "doble", "narrativa": "3 frases: problema complejo que exige dos decisiones simultáneas", "concepto": "marco integrador", "subdecisiones": [2 objetos {"modulo": "' + subMod1 + '" o "' + subMod2 + '", "titulo": "la decisión a tomar", "opciones": [3 objetos {"texto": neutro, "feedback": didáctico, "impactos": ±7}]}]}\n' +
+    ']}\n' +
+    'Empresa: ' + EMPRESA + ', ' + fase.nombre + ' (año ' + fase.ano + ', ' + fase.empleados + ' empleados, ' + fase.ingresos + '). Estado actual de KPIs: ' + kpisTxt + '. Tema obligatorio: "' + tema.tema + '" (módulo: ' + modulo + '). Contexto macro: ' + contexto + '. Evento: ' + evento + '. Ninguna opción debe dominar en los 4 KPIs. Devuelve solo el JSON.';
   const resp = await fetch('https://api.mistral.ai/v1/chat/completions', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + apiKey },
     body: JSON.stringify({
       model: 'mistral-small-latest',
-      temperature: 0.8,
+      temperature: 0.85,
       response_format: { type: 'json_object' },
       messages: [{ role: 'user', content: prompt }]
     })
   });
   if (!resp.ok) throw new Error('API error ' + resp.status);
   const data = await resp.json();
-  const contenido = JSON.parse(data.choices[0].message.content);
+  const c = JSON.parse(data.choices[0].message.content);
   const dilemas = [];
-  (contenido.dilemas || []).forEach(d => {
-    if (d.tipo === 'slider' && d.efectosA && d.efectosB) {
+  (c.dilemas || []).forEach(d => {
+    if (d.tipo === 'eleccion' && Array.isArray(d.opciones) && d.opciones.length >= 3) {
       dilemas.push({
-        tipo: 'slider',
-        narrativa: d.narrativa || '',
-        concepto: d.concepto || tema.tema,
-        etiquetaA: d.etiquetaA || 'Palanca A',
-        etiquetaB: d.etiquetaB || 'Palanca B',
+        tipo: 'eleccion', narrativa: d.narrativa || '', concepto: d.concepto || tema.tema,
+        opciones: shuffle(d.opciones.slice(0, 4).map(o => ({
+          texto: o.texto || '', feedback: o.feedback || '',
+          impactos: { finanzas: clampI(o.impactos && o.impactos.finanzas), operaciones: clampI(o.impactos && o.impactos.operaciones), talento: clampI(o.impactos && o.impactos.talento), mercado: clampI(o.impactos && o.impactos.mercado) }
+        })))
+      });
+    } else if (d.tipo === 'slider' && d.efectosA && d.efectosB) {
+      dilemas.push({
+        tipo: 'slider', narrativa: d.narrativa || '', concepto: d.concepto || tema.tema,
+        etiquetaA: d.etiquetaA || 'Palanca A', etiquetaB: d.etiquetaB || 'Palanca B',
         efectosA: { finanzas: clampI(d.efectosA.finanzas), operaciones: clampI(d.efectosA.operaciones), talento: clampI(d.efectosA.talento), mercado: clampI(d.efectosA.mercado) },
         efectosB: { finanzas: clampI(d.efectosB.finanzas), operaciones: clampI(d.efectosB.operaciones), talento: clampI(d.efectosB.talento), mercado: clampI(d.efectosB.mercado) },
-        posicionOptima: Math.max(0, Math.min(100, Math.round(d.posicionOptima || 50))),
-        feedbackOptimo: d.feedbackOptimo || '',
-        feedbackExtremoA: d.feedbackExtremoA || '',
-        feedbackExtremoB: d.feedbackExtremoB || ''
+        posicionOptima: Math.max(30, Math.min(70, Math.round(d.posicionOptima || 50))),
+        feedbackOptimo: d.feedbackOptimo || '', feedbackExtremoA: d.feedbackExtremoA || '', feedbackExtremoB: d.feedbackExtremoB || ''
       });
-    } else if (Array.isArray(d.opciones) && d.opciones.length >= 2) {
-      dilemas.push({
-        tipo: 'eleccion',
-        narrativa: d.narrativa || '',
-        concepto: d.concepto || tema.tema,
-        opciones: d.opciones.slice(0, 2).map(o => ({
-          texto: o.texto || '',
-          feedback: o.feedback || '',
-          impactos: {
-            finanzas: clampI(o.impactos && o.impactos.finanzas),
-            operaciones: clampI(o.impactos && o.impactos.operaciones),
-            talento: clampI(o.impactos && o.impactos.talento),
-            mercado: clampI(o.impactos && o.impactos.mercado)
-          }
-        }))
-      });
+    } else if (d.tipo === 'doble' && Array.isArray(d.subdecisiones) && d.subdecisiones.length === 2) {
+      const subs = d.subdecisiones.map(s => ({
+        modulo: s.modulo || subMod1,
+        titulo: s.titulo || 'Decisión',
+        opciones: shuffle((s.opciones || []).slice(0, 3).map(o => ({
+          texto: o.texto || '', feedback: o.feedback || '',
+          impactos: { finanzas: clampI(o.impactos && o.impactos.finanzas), operaciones: clampI(o.impactos && o.impactos.operaciones), talento: clampI(o.impactos && o.impactos.talento), mercado: clampI(o.impactos && o.impactos.mercado) }
+        })))
+      }));
+      if (subs.every(s => s.opciones.length >= 2)) {
+        dilemas.push({ tipo: 'doble', narrativa: d.narrativa || '', concepto: d.concepto || tema.tema, subdecisiones: subs });
+      }
     }
   });
-  if (dilemas.length !== 3 || !dilemas.some(x => x.tipo === 'slider')) throw new Error('Esquema invalido');
+  if (dilemas.length !== 3) throw new Error('Esquema invalido');
   return {
-    etapa: etapa,
-    modulo: tema.modulo,
-    tema: tema.tema,
-    sector: sector.nombre,
-    empresa: sector.empresa,
-    contexto: contexto,
-    evento: evento,
+    etapa: etapa, modulo: modulo, tema: tema.tema, fase: fase, contexto: contexto, evento: evento,
     origen: 'IA (Mistral)',
-    objetivo: contenido.objetivo || ('Superar los 3 dilemas manteniendo los 4 KPIs por encima del 0%, aplicando "' + tema.tema + '" en ' + sector.nombre + '.'),
     teoria: {
-      intro: (contenido.teoria && contenido.teoria.intro) || TEORIA_MODULO[tema.modulo].intro,
-      puntos: (contenido.teoria && Array.isArray(contenido.teoria.puntos) && contenido.teoria.puntos.length ? contenido.teoria.puntos : TEORIA_MODULO[tema.modulo].puntos)
+      intro: (c.teoria && c.teoria.intro) || TEORIA_MODULO[modulo].intro,
+      puntos: (c.teoria && Array.isArray(c.teoria.puntos) && c.teoria.puntos.length ? c.teoria.puntos : TEORIA_MODULO[modulo].puntos)
     },
     dilemas: dilemas
   };
 }
 
 function generarEscenarioLocal(etapa) {
-  const tema = TEMAS_EMBA[etapa];
-  const sector = rnd(SECTORES);
+  const tema = temaDeEtapa(etapa);
+  const modulo = moduloDeEtapa(etapa);
+  const fase = faseDeEtapa(etapa);
   const contexto = rnd(CONTEXTOS);
   const evento = rnd(EVENTOS);
-  const teoriaMod = TEORIA_MODULO[tema.modulo];
   return {
-    etapa: etapa,
-    modulo: tema.modulo,
-    tema: tema.tema,
-    sector: sector.nombre,
-    empresa: sector.empresa,
-    contexto: contexto,
-    evento: evento,
+    etapa: etapa, modulo: modulo, tema: tema.tema, fase: fase, contexto: contexto, evento: evento,
     origen: 'Generador interno',
-    objetivo: 'Superar los 3 dilemas manteniendo los 4 KPIs por encima del 0%, aplicando "' + tema.tema + '" en ' + sector.nombre + ' frente a ' + contexto.toLowerCase() + '.',
-    teoria: { intro: teoriaMod.intro, puntos: teoriaMod.puntos.slice() },
-    dilemas: construirDilemas(tema, sector, contexto, evento)
+    teoria: { intro: TEORIA_MODULO[modulo].intro, puntos: TEORIA_MODULO[modulo].puntos.slice() },
+    dilemas: construirDilemas(etapa, tema, modulo, fase, contexto, evento)
   };
 }
 
-function construirDilemas(tema, sector, contexto, evento) {
-  return [
-    {
-      tipo: 'eleccion',
-      concepto: tema.tema + ' — diagnóstico y priorización bajo incertidumbre',
-      narrativa: 'Diriges ' + sector.empresa + ', empresa de referencia en ' + sector.nombre +
-        '. El entorno macro cambió: ' + contexto.toLowerCase() + '. De repente, ' + evento +
-        '. Tu comité ejecutivo exige una respuesta inmediata y la ventana de decisión es de 48 horas. La cuestión de fondo es cómo aplicar los principios de "' + tema.tema + '" sin comprometer la continuidad del negocio.',
-      opciones: [
-        {
-          texto: 'Respuesta rápida y agresiva: movilizar todos los recursos disponibles para contener el impacto inmediato, incluso saturando a los equipos y aceptando sobrecostes importantes este trimestre.',
-          feedback: 'La velocidad sin análisis es reactividad, no estrategia. Contienes el fuego a corto plazo (algo de Mercado), pero los sobrecostes golpean Finanzas, la organización saturada pierde calidad operativa y el talento directivo quema horas extraordinarias sin plan de sostenibilidad. En ' + sector.nombre + ', una respuesta no priorizada según "' + tema.tema + '" solo traslada el problema al siguiente trimestre.',
-          impactos: { finanzas: -18, operaciones: -10, talento: -12, mercado: +8 }
-        },
-        {
-          texto: 'Respuesta estructurada: activar un comité de crisis que priorice los impactos según su criticidad, comunicar un plan de contingencia creíble a clientes e inversores y proteger la capacidad operativa y humana clave.',
-          feedback: 'Aplicas la disciplina directiva que exige "' + tema.tema + '": primero diagnosticar, luego priorizar, después actuar con la organización alineada. Contener el impacto sin destruir márgenes ni moral exige invertir en comunicación y coordinación (puntual coste en Finanzas), pero preserva la ejecución, la confianza interna y la reputación ante ' + contexto.toLowerCase() + '.',
-          impactos: { finanzas: -6, operaciones: +10, talento: +10, mercado: +10 }
-        }
-      ]
-    },
-    {
-      tipo: 'slider',
-      concepto: tema.tema + ' — asignación de recursos y trade-offs entre defensa y ataque',
-      narrativa: 'Semana 3. En plena fase de ' + contexto.toLowerCase() + ', el efecto de "' + evento +
-        '" obliga a activar un presupuesto extraordinario de 10 millones. El comité está dividido: una parte pide blindar el núcleo del negocio; la otra, acelerar la transformación basada en "' + tema.tema +
-        '". Tú decides cómo se reparte cada euro entre las dos palancas. Mueve el control y observa en vivo cómo reaccionarían tus KPIs antes de confirmar.',
-      etiquetaA: 'Blindar el núcleo operativo y comercial',
-      etiquetaB: 'Acelerar la transformación estratégica',
-      efectosA: { finanzas: +6, operaciones: +12, talento: +8, mercado: -6 },
-      efectosB: { finanzas: -12, operaciones: -4, talento: -4, mercado: +16 },
-      posicionOptima: 60,
-      feedbackOptimo: 'El punto didáctico de "' + tema.tema + '" es que los recursos escasos exigen equilibrio: blindar en exceso te hace irrelevante mañana y transformar en exceso te deja sin caja hoy. Alrededor del 60/40 proteges la máquina que genera caja mientras construyes la posición futura.',
-      feedbackExtremoA: 'Con casi todo el presupuesto en blindar, la caja y las operaciones respiran, pero el mercado percibe una empresa a la defensiva justo cuando "' + tema.tema + '" exige moverse primero. ',
-      feedbackExtremoB: 'Con casi todo en transformar, la narrativa es ambiciosa pero la caja se drena y el negocio núcleo queda desprotegido en medio de ' + contexto.toLowerCase() + '. '
-    },
-    {
-      tipo: 'eleccion',
-      concepto: tema.tema + ' — consolidación de ventaja frente a crecimiento cosmético',
-      narrativa: 'Final del trimestre. La tormenta de "' + evento + '" ha dejado la industria de ' + sector.nombre +
-        ' reordenada: varios competidores han desaparecido y queda espacio para capturar cuota. Sin embargo, tu CFO advierte que la caja apenas da para una sola gran apuesta en medio de ' + contexto.toLowerCase() +
-        '. La junta directiva te pide elegir el movimiento final que defina tu legado en torno a "' + tema.tema + '".',
-      opciones: [
-        {
-          texto: 'Apuesta ofensiva por volumen: capturar cuota agresivamente con precios bajos y máxima inversión comercial, asumiendo pérdida de margen durante dos años.',
-          feedback: 'La captura de cuota a cualquier precio confunde crecimiento con rentabilidad. En ' + sector.nombre + ' y con ' + contexto.toLowerCase() + ', financiar cuota con margen negativo drena caja (Finanzas), fuerza a Operaciones a escalar sin red y el talento nota la presión. La cuota gana (Mercado sube), pero sin los fundamentos de "' + tema.tema + '" la posición es insostenible.',
-          impactos: { finanzas: -16, operaciones: -10, talento: -8, mercado: +14 }
-        },
-        {
-          texto: 'Apuesta por rentabilidad sostenible: consolidar la posición en los segmentos más rentables, consolidar el aprendizaje de la crisis en procesos y cultura, y construir una barrera defendible basada en "' + tema.tema + '".',
-          feedback: 'Cierre de nivel ejemplar: eliges dónde competir y dónde no, consolidas margen y conviertes la crisis en aprendizaje organizativo. Renuncias a cuota cosmética (Mercado sube moderadamente), pero refuerzas caja, disciplina operativa y orgullo interno. Es exactamente el núcleo de "' + tema.tema + '": ventaja defendible antes que tamaño.',
-          impactos: { finanzas: +14, operaciones: +10, talento: +8, mercado: +5 }
-        }
-      ]
-    }
-  ];
+const OPCIONES_NEUTRAS = [
+  {
+    texto: 'Reordenar la casa antes de mover ficha: rediseñar cómo se toman las decisiones y quién responde por cada resultado.',
+    feedback: 'Estructura antes de velocidad: sin claridad de gobernanza la ejecución se diluye. Ganas disciplina operativa y confianza del equipo, pero el mercado espera y el reloj de la caja no se detiene. El tema del trimestre se aplica precisamente en cómo ordenas los trade-offs antes de comprometer recursos.',
+    impactos: { finanzas: -2, operaciones: +7, talento: +7, mercado: -4 }
+  },
+  {
+    texto: 'Tomar la ofensiva comercial: volcarse en el segmento de clientes que más responde y aceptar el desgaste que venga.',
+    feedback: 'Atacar donde el mercado responde maximiza la señal exterior, pero las palancas internas quedan tirantes: caja comprometida y equipos al límite. La teoría enseña que la demanda ganada sin capacidad para servirla destruye reputación más rápido de lo que la construye.',
+    impactos: { finanzas: -7, operaciones: -4, talento: -4, mercado: +11 }
+  },
+  {
+    texto: 'Proteger el balance: congelar la inversión no comprometida y priorizar la generación de caja del trimestre.',
+    feedback: 'La caja compra tiempo y opciones futuras — es la reserva estratégica clásica. Pero el mensaje interno es de contención: el talento con ambición lee las señales, y el mercado nota que la empresa se repliega. El equilibrio entre solvencia e impulso es el corazón de este tema.',
+    impactos: { finanzas: +10, operaciones: +2, talento: -7, mercado: -6 }
+  },
+  {
+    texto: 'Invertir en el motor interno: incorporar capacidad y talento adicionales antes de acelerar nada.',
+    feedback: 'Construir capacidad antes de la demanda es apuesta de fondo: si llega el crecimiento, lo absorbes; si no llega, el coste fijo pesa. La teoría distingue aquí capacidad productiva de capacidad estratégica — solo la segunda crea ventaja defendible.',
+    impactos: { finanzas: -7, operaciones: +7, talento: +9, mercado: -3 }
+  }
+];
+
+const BANCO_SUBDECISIONES = {
+  'Estrategia': [
+    { texto: 'Priorizar un único mercado y posicionar con nitidez', feedback: 'El foco concentra recursos y mensaje: la propuesta de valor se entiende y se defiende mejor.', impactos: { mercado: +7, finanzas: -3, talento: -1, operaciones: +1 } },
+    { texto: 'Diversificar la apuesta en tres frentes paralelos', feedback: 'La diversificación reparte riesgo pero también atención: sin foco, ninguna posición madura lo suficiente para ser defendible.', impactos: { mercado: +3, finanzas: -5, operaciones: -4, talento: +2 } },
+    { texto: 'Adquirir un competidor pequeño para ganar tiempo', feedback: 'Comprar tiempo puede ser racional, pero la integración consume capacidad directiva que a menudo se subestima.', impactos: { mercado: +5, finanzas: -8, operaciones: -3, talento: -3 } }
+  ],
+  'Finanzas': [
+    { texto: 'Ampliar la línea de crédito disponible', feedback: 'La liquidez amplía el margen de maniobra; su coste financiero se nota si el apalancamiento crece sin control.', impactos: { finanzas: +8, mercado: -2, talento: 0, operaciones: +1 } },
+    { texto: 'Emitir deuda a medio plazo', feedback: 'La deuda estructurada financia sin diluir, pero convierte flexibilidad en obligación fija.', impactos: { finanzas: +6, operaciones: -2, talento: -1, mercado: -1 } },
+    { texto: 'Vender una participación minoritaria a un fondo', feedback: 'La entrada de capital privado trae caja y consejo, pero también una agenda propia en el accionariado.', impactos: { finanzas: +8, mercado: -3, talento: -2, operaciones: 0 } }
+  ],
+  'Marketing': [
+    { texto: 'Concentrar la inversión en el canal que mejor convierte', feedback: 'La eficiencia de corto plazo maximiza el retorno inmediato, pero construye poca marca.', impactos: { mercado: +7, finanzas: +1, operaciones: -2, talento: -2 } },
+    { texto: 'Redistribuir presupuesto hacia marca y notoriedad', feedback: 'La marca es la barrera de entrada futura: paga lentamente y se destruye rápido.', impactos: { mercado: +5, finanzas: -4, talento: +1, operaciones: 0 } },
+    { texto: 'Activar un programa de referidos con los clientes actuales', feedback: 'El cliente que trae cliente llega con coste bajo y confianza alta; el riesgo es depender de incentivos.', impactos: { mercado: +4, finanzas: +2, operaciones: -3, talento: -1 } }
+  ],
+  'Operaciones': [
+    { texto: 'Automatizar el proceso con más cola de trabajo', feedback: 'Automatizar el cuello de botella real multiplica el sistema; automatizar lo equivocado solo añade coste fijo.', impactos: { operaciones: +8, finanzas: -5, talento: -4, mercado: +2 } },
+    { texto: 'Ampliar turnos y capacidad manual temporal', feedback: 'La capacidad flexible absorbe picos sin deuda tecnológica, pero es cara y difícil de sostener.', impactos: { operaciones: +5, finanzas: -5, talento: +3, mercado: 0 } },
+    { texto: 'Rediseñar el flujo completo antes de tocar tecnología', feedback: 'Mejorar un proceso roto con software entrega un proceso roto más rápido: primero el flujo, luego la máquina.', impactos: { operaciones: +6, finanzas: -2, talento: +2, mercado: -2 } }
+  ],
+  'Capital Humano': [
+    { texto: 'Subir la compensación variable ligada a hitos', feedback: 'El variable alinea incentivos con resultados, pero enseña a perseguir el número y no la misión.', impactos: { talento: +6, finanzas: -4, mercado: +1, operaciones: 0 } },
+    { texto: 'Crear un programa de desarrollo y promoción interna', feedback: 'Desarrollar dentro construye cultura y memoria; su retorno llega en años, no en trimestres.', impactos: { talento: +7, finanzas: -2, mercado: -1, operaciones: +1 } },
+    { texto: 'Incorporar perfiles senior externos para los roles críticos', feedback: 'El talento externo trae método y red de contactos; su integración es más lenta de lo que el organigrama sugiere.', impactos: { talento: +5, finanzas: -5, operaciones: +2, mercado: -1 } }
+  ]
+};
+
+function construirDilemas(etapa, tema, modulo, fase, contexto, evento) {
+  const subMod1 = ORDEN_MODULOS[etapa % ORDEN_MODULOS.length];
+  const subMod2 = ORDEN_MODULOS[(etapa + 1) % ORDEN_MODULOS.length];
+  const eleccion = {
+    tipo: 'eleccion',
+    concepto: tema.tema + ' — diagnóstico y primera decisión del trimestre',
+    narrativa: fase.narrativa + ' Este trimestre, con ' + contexto.toLowerCase() + ', ' + evento +
+      '. El tema en el tapete es "' + tema.tema + '" y la dirección debe fijar el primer movimiento. Toda opción mueve algo: elige la que tu criterio resista mejor ante el consejo.',
+    opciones: shuffle(OPCIONES_NEUTRAS.slice())
+  };
+  const opt = Math.floor(35 + Math.random() * 31);
+  const slider = {
+    tipo: 'slider',
+    concepto: tema.tema + ' — asignación de recursos bajo información incompleta',
+    narrativa: 'El comité aprueba un fondo extraordinario para responder a ' + evento + '. La dirección está partida en dos: una parte pide consolidar lo que ya funciona; la otra, adelantar la siguiente curva en torno a "' + tema.tema +
+      '". Tú decides el reparto exacto. Los impactos sobre tus KPIs quedan ocultos: dispones de los informes de los analistas, que rara vez coinciden.',
+    etiquetaA: 'Consolidar la máquina actual',
+    etiquetaB: 'Construir la siguiente curva',
+    efectosA: { finanzas: +5, operaciones: +9, talento: +4, mercado: -8 },
+    efectosB: { finanzas: -9, operaciones: -5, talento: -4, mercado: +13 },
+    posicionOptima: opt,
+    feedbackOptimo: 'El punto didáctico de "' + tema.tema + '" es que los recursos escasos exigen equilibrio: consolidar en exceso te hace irrelevante mañana y construir en exceso te deja sin caja hoy. Tu reparto protege la máquina que genera caja mientras construye la posición futura.',
+    feedbackExtremoA: 'Con casi todo el fondo en consolidación, la caja respira pero el mercado percibe una empresa a la defensiva justo cuando la ventana competitiva está abierta. ',
+    feedbackExtremoB: 'Con casi todo el fondo en la nueva curva, la narrativa es ambiciosa pero el negocio que financia el cambio queda desprotegido. '
+  };
+  const doble = {
+    tipo: 'doble',
+    concepto: 'Coherencia estratégica entre dominios: ' + subMod1 + ' + ' + subMod2,
+    narrativa: 'El trimestre cierra con un problema que no se resuelve con una sola palanca: ' + evento +
+      ' exige decisiones simultáneas en ' + subMod1 + ' y en ' + subMod2 + '. El comité espera dos respuestas coherentes entre sí — una mala combinación puede anularse a sí misma.',
+    subdecisiones: [construirSubdecision(subMod1), construirSubdecision(subMod2)]
+  };
+  return [eleccion, slider, doble];
 }
 
-/* ============================================================
-   RENDER
-   ============================================================ */
-function renderKPIs(proyeccion) {
+function construirSubdecision(modulo) {
+  const tituloPorModulo = {
+    'Estrategia': 'Dónde jugar este trimestre',
+    'Finanzas': 'Cómo financiar el movimiento',
+    'Marketing': 'Cómo salir al mercado',
+    'Operaciones': 'Cómo sostener la ejecución',
+    'Capital Humano': 'Cómo asegurar el equipo'
+  };
+  return {
+    modulo: modulo,
+    titulo: tituloPorModulo[modulo] || 'Decisión',
+    opciones: shuffle(BANCO_SUBDECISIONES[modulo].slice())
+  };
+}
+
+function renderKPIs() {
   KPI_KEYS.forEach(k => {
     const v = Math.round(kpis[k]);
+    const box = document.getElementById('kpi-' + k);
     document.getElementById('val-' + k).textContent = v + '%';
-    document.getElementById('kpi-' + k).classList.toggle('low', v <= 20);
-    const proj = document.getElementById('proj-' + k);
-    if (proyeccion) {
-      const p = Math.min(100, Math.max(0, kpis[k] + proyeccion[k]));
-      const d = Math.round(p - kpis[k]);
-      proj.textContent = '→ ' + Math.round(p) + '% (' + signo(d) + ')';
-      proj.className = 'proj ' + (d > 0 ? 'up' : d < 0 ? 'down' : '');
+    box.classList.toggle('low', v <= UMBRAL_COLAPSO);
+    box.classList.toggle('warn', v > UMBRAL_COLAPSO && v < UMBRAL_VIGILANCIA);
+    const streak = document.getElementById('streak-' + k);
+    if (racha[k] > 0 && v < UMBRAL_VIGILANCIA) {
+      streak.textContent = '⚠ ' + racha[k] + '/' + RACHA_MAXIMA + ' rondas < 40%';
+      streak.className = 'streak alerta';
+    } else if (racha[k] > 0) {
+      streak.textContent = 'racha vigilada: ' + racha[k] + '/' + RACHA_MAXIMA;
+      streak.className = 'streak';
     } else {
-      proj.textContent = '';
+      streak.textContent = '';
+      streak.className = 'streak';
     }
   });
 }
 
 function renderCabecera() {
-  document.getElementById('stage-title').textContent = 'Etapa ' + escenario.etapa + ' de 100 — ' + escenario.tema;
-  document.getElementById('stage-modulo').textContent = 'Módulo: ' + escenario.modulo + ' · Escenario: ' + escenario.origen;
-  document.getElementById('stage-meta').innerHTML =
-    'Sector: ' + escenario.sector + ' (' + escenario.empresa + ') · Contexto: ' + escenario.contexto;
-  document.getElementById('objetivo-bar').innerHTML = '<b>🎯 Objetivo de la etapa:</b> ' + escenario.objetivo;
+  const f = escenario.fase;
+  document.getElementById('stage-title').innerHTML = 'Etapa ' + escenario.etapa + ' · ' +
+    MODULO_ICONO[escenario.modulo] + ' ' + escenario.modulo + ' <span>— ' + escenario.tema + '</span>';
+  document.getElementById('company-strip').innerHTML =
+    '<span class="fase">' + f.nombre + '</span>' +
+    '<span>Año <b>' + f.ano + '</b></span>' +
+    '<span><b>' + f.empleados + '</b> empleados</span>' +
+    '<span>Ingresos <b>' + f.ingresos + '</b></span>' +
+    '<span>Presencia: <b>' + f.mercados + '</b></span>' +
+    '<span>· ' + escenario.origen + '</span>';
+  document.getElementById('objetivo-bar').innerHTML =
+    '<b>🎯 Objetivo:</b> completa los 3 dilemas manteniendo los 4 KPIs por encima del <b>35%</b>. ' +
+    'Ningún KPI puede pasar <b class="regla-roja">3 rondas seguidas por debajo del 40%</b>. Los valores se heredan de la etapa anterior.';
+}
+
+function textoSituacion() {
+  const f = escenario.fase;
+  const notas = [];
+  KPI_KEYS.forEach(k => {
+    const v = kpis[k];
+    const nombre = KPI_LABELS_CORTOS[k];
+    if (v < UMBRAL_VIGILANCIA) notas.push('⚠ ' + nombre + ' está en zona de vigilancia (' + Math.round(v) + '%)');
+    else if (v >= 62) notas.push('✓ ' + nombre + ' llega fortalecida (' + Math.round(v) + '%)');
+  });
+  const herencia = notas.length ? notas.join(' · ') : 'Los cuatro indicadores llegan en zona estable.';
+  return '<b>Situación de ' + EMPRESA + ' — ' + f.nombre + ':</b> ' + f.narrativa +
+    ' Contexto macro: ' + escenario.contexto.toLowerCase() + '.<br><b>Herencia de etapas anteriores:</b> ' + herencia;
 }
 
 function mostrarTeoria() {
   document.getElementById('teoria-tema').textContent = escenario.tema;
+  document.getElementById('teoria-situacion').innerHTML = textoSituacion();
   document.getElementById('teoria-intro').textContent = escenario.teoria.intro;
   const list = document.getElementById('teoria-list');
   list.innerHTML = '';
@@ -848,21 +856,26 @@ document.getElementById('btn-go-dilemmas').addEventListener('click', () => {
 
 function renderDilemma() {
   const d = escenario.dilemas[dilemmaIndex];
+  const mecanica = d.tipo === 'slider' ? 'asignación de recursos (impactos ocultos)' :
+                   d.tipo === 'doble' ? 'decisión doble: dos módulos a la vez' : 'decisión ejecutiva';
   document.getElementById('dilemma-tag').textContent =
-    'Dilema ' + (dilemmaIndex + 1) + ' de ' + escenario.dilemas.length +
-    (d.tipo === 'slider' ? ' · Mecánica: asignación de recursos' : ' · Mecánica: decisión ejecutiva');
+    'Dilema ' + (dilemmaIndex + 1) + ' de ' + escenario.dilemas.length + ' · ' + mecanica;
   document.getElementById('dilemma-narrative').textContent = d.narrativa;
   const opts = document.getElementById('options-container');
+  const dual = document.getElementById('dual-container');
   const slider = document.getElementById('slider-container');
-  opts.innerHTML = '';
-  slider.innerHTML = '';
+  opts.innerHTML = ''; dual.innerHTML = ''; slider.innerHTML = '';
   if (d.tipo === 'slider') {
-    opts.style.display = 'none';
+    opts.style.display = 'none'; dual.style.display = 'none';
     slider.style.display = 'block';
     renderSlider(d);
+  } else if (d.tipo === 'doble') {
+    opts.style.display = 'none'; slider.style.display = 'none';
+    dual.style.display = 'block';
+    renderDual(d);
   } else {
+    dual.style.display = 'none'; slider.style.display = 'none';
     opts.style.display = 'flex';
-    slider.style.display = 'none';
     d.opciones.forEach((op, i) => {
       const btn = document.createElement('button');
       btn.className = 'option';
@@ -875,39 +888,137 @@ function renderDilemma() {
 
 function renderSlider(d) {
   const cont = document.getElementById('slider-container');
+  const datos = construirDatosAnalistas(d);
   cont.innerHTML =
     '<div class="slider-box">' +
+      '<div class="slider-varname">Variable que estás decidiendo: <b>reparto del fondo extraordinario</b> entre las dos palancas</div>' +
       '<div class="slider-labels"><span><b>A.</b> ' + d.etiquetaA + '</span><span><b>B.</b> ' + d.etiquetaB + '</span></div>' +
       '<input type="range" id="alloc-slider" min="0" max="100" value="50" step="5">' +
-      '<div class="slider-readout">Reparto del presupuesto: <b id="alloc-readout-a">50%</b> a la palanca A · <b id="alloc-readout-b">50%</b> a la palanca B</div>' +
-      '<p style="font-size:.78rem; color:#94a3b8; text-align:center; margin:8px 0 16px;">Mueve el control y observa cómo se moverían tus KPIs (flechas bajo cada indicador) antes de confirmar.</p>' +
+      '<div class="slider-ticks"><span>0% A</span><span>25</span><span>50</span><span>75</span><span>100% B</span></div>' +
+      '<div class="slider-zonas"><span>Zona A: casi todo a consolidar</span><span>Zona mixta</span><span>Zona B: casi todo a la nueva curva</span></div>' +
+      '<div class="slider-readout">Reparto elegido: <b id="alloc-readout-a">50%</b> a A · <b id="alloc-readout-b">50%</b> a B</div>' +
+      '<div class="analistas">' +
+        '<h5>📊 INFORMES ORIENTATIVOS — los impactos reales en tus KPIs permanecen ocultos</h5>' +
+        '<div class="analista-chart">' + datos.svg + '</div>' +
+        datos.quotes +
+      '</div>' +
       '<div class="btn-row"><button class="btn-main" id="btn-confirm-slider">Confirmar asignación</button></div>' +
     '</div>';
   const sliderEl = document.getElementById('alloc-slider');
-  function impactosDe(x) {
-    const imp = {};
-    KPI_KEYS.forEach(k => {
-      imp[k] = Math.round((d.efectosA[k] * x + d.efectosB[k] * (100 - x)) / 100);
-    });
-    return imp;
-  }
   function actualizar() {
     const x = parseInt(sliderEl.value, 10);
     document.getElementById('alloc-readout-a').textContent = x + '%';
     document.getElementById('alloc-readout-b').textContent = (100 - x) + '%';
-    renderKPIs(impactosDe(x));
   }
   sliderEl.addEventListener('input', actualizar);
   actualizar();
   document.getElementById('btn-confirm-slider').addEventListener('click', () => {
     const x = parseInt(sliderEl.value, 10);
-    const imp = impactosDe(x);
+    const imp = {};
+    KPI_KEYS.forEach(k => {
+      imp[k] = Math.round((d.efectosA[k] * x + d.efectosB[k] * (100 - x)) / 100);
+    });
     let feedback;
     if (Math.abs(x - d.posicionOptima) <= 15) feedback = d.feedbackOptimo;
     else if (x < d.posicionOptima) feedback = d.feedbackExtremoA + d.feedbackOptimo;
     else feedback = d.feedbackExtremoB + d.feedbackOptimo;
-    registrarDecision(d, 'Asignaste ' + x + '% a "' + d.etiquetaA + '" y ' + (100 - x) + '% a "' + d.etiquetaB + '"', feedback, imp);
-    aplicarImpactos(imp);
+    registrarDecision(d, 'Asignaste ' + x + '% del fondo a "' + d.etiquetaA + '" y ' + (100 - x) + '% a "' + d.etiquetaB + '"', feedback, imp);
+    aplicarRonda(imp);
+  });
+}
+
+function construirDatosAnalistas(d) {
+  const W = 440, H = 150, pad = 28;
+  function puntosCurva(fn) {
+    const pts = [];
+    for (let x = 0; x <= 100; x += 10) {
+      const y = fn(x);
+      pts.push((pad + x / 100 * (W - pad * 2)).toFixed(1) + ',' + (H - pad - y / 100 * (H - pad * 2)).toFixed(1));
+    }
+    return pts.join(' ');
+  }
+  const pico = Math.max(15, Math.min(85, d.posicionOptima + Math.floor(Math.random() * 17 - 8)));
+  const ingresos = x => 25 + 55 * Math.exp(-Math.pow(x - pico, 2) / 1400);
+  const riesgo = x => 20 + 0.55 * x + 12 * Math.exp(-Math.pow(x - 85, 2) / 500);
+  const svg =
+    '<svg viewBox="0 0 ' + W + ' ' + H + '" style="width:100%; height:auto;">' +
+      '<line x1="' + pad + '" y1="' + (H - pad) + '" x2="' + (W - pad) + '" y2="' + (H - pad) + '" stroke="#2b3a63" stroke-width="1"/>' +
+      '<line x1="' + pad + '" y1="' + pad + '" x2="' + pad + '" y2="' + (H - pad) + '" stroke="#2b3a63" stroke-width="1"/>' +
+      '<text x="' + (pad + 2) + '" y="' + (H - 8) + '" fill="#64748b" font-size="9">100% A</text>' +
+      '<text x="' + (W - pad - 30) + '" y="' + (H - 8) + '" fill="#64748b" font-size="9">100% B</text>' +
+      '<polyline points="' + puntosCurva(ingresos) + '" fill="none" stroke="#00f2fe" stroke-width="2.5"/>' +
+      '<polyline points="' + puntosCurva(riesgo) + '" fill="none" stroke="#f59e0b" stroke-width="2" stroke-dasharray="5,4"/>' +
+    '</svg>' +
+    '<div class="chart-legend">' +
+      '<span><i style="background:#00f2fe"></i>Ingresos esperados a 18 meses (consultora externa, ±20% error)</span>' +
+      '<span><i style="background:#f59e0b"></i>Tensión esperada de caja (auditoría interna)</span>' +
+    '</div>';
+  const recA = Math.max(15, Math.min(85, d.posicionOptima + Math.floor(Math.random() * 25 - 12)));
+  const recB = Math.max(15, Math.min(85, d.posicionOptima + Math.floor(Math.random() * 25 - 12)));
+  const quotes =
+    '<div class="analista-quote"><b>CFO:</b> "Nuestra modelización interna favorece un reparto cercano al ' + recA + '% hacia la palanca A. La incertidumbre del modelo es alta, pero es lo que tenemos."</div>' +
+    '<div class="analista-quote"><b>Directora de Estrategia:</b> "El benchmark del sector sitúa a los ganadores de los últimos ciclos cerca del ' + recB + '% hacia la palanca B. Ojo: el benchmark también incluye a los que quebraron."</div>' +
+    '<div class="analista-quote"><b>Consejo externo:</b> "Ninguna empresa de este sector ha sobrevivido tres años con repartos extremos. El diablo está en la coherencia con el resto de decisiones del trimestre."</div>';
+  return { svg: svg, quotes: quotes };
+}
+
+function renderDual(d) {
+  const cont = document.getElementById('dual-container');
+  cont.innerHTML = '';
+  const seleccion = [null, null];
+  const grid = document.createElement('div');
+  grid.className = 'dual-grid';
+  d.subdecisiones.forEach((sub, idx) => {
+    const card = document.createElement('div');
+    card.className = 'dual-card';
+    const h = document.createElement('h4');
+    h.textContent = sub.titulo;
+    const mod = document.createElement('div');
+    mod.className = 'dual-mod';
+    mod.textContent = MODULO_ICONO[sub.modulo] + ' ' + sub.modulo;
+    const box = document.createElement('div');
+    box.className = 'options';
+    sub.opciones.forEach((op, i) => {
+      const btn = document.createElement('button');
+      btn.className = 'option';
+      btn.textContent = op.texto;
+      btn.addEventListener('click', () => {
+        seleccion[idx] = { subIdx: idx, opIdx: i };
+        Array.prototype.forEach.call(box.children, b => b.classList.remove('sel'));
+        btn.classList.add('sel');
+        actualizarConfirm();
+      });
+      box.appendChild(btn);
+    });
+    card.appendChild(h); card.appendChild(mod); card.appendChild(box);
+    grid.appendChild(card);
+  });
+  cont.appendChild(grid);
+  const confirmBtn = document.createElement('button');
+  confirmBtn.className = 'btn-main';
+  confirmBtn.textContent = 'Confirmar ambas decisiones';
+  confirmBtn.disabled = true;
+  confirmBtn.style.display = 'block';
+  confirmBtn.style.margin = '0 auto';
+  cont.appendChild(confirmBtn);
+  function actualizarConfirm() {
+    confirmBtn.disabled = !(seleccion[0] && seleccion[1]);
+  }
+  confirmBtn.addEventListener('click', () => {
+    const imp = { finanzas: 0, operaciones: 0, talento: 0, mercado: 0 };
+    const partes = [];
+    const feedbacks = [];
+    seleccion.forEach(sel => {
+      const sub = d.subdecisiones[sel.subIdx];
+      const op = sub.opciones[sel.opIdx];
+      KPI_KEYS.forEach(k => { imp[k] += op.impactos[k]; });
+      partes.push(sub.modulo + ': "' + op.texto + '"');
+      feedbacks.push('<b>' + sub.modulo + ':</b> ' + op.feedback);
+    });
+    const feedback = feedbacks.join('<br><br>') +
+      '<br><br><b>Interacción:</b> la coherencia entre ambas decisiones es tan importante como cada una por separado: ' + d.concepto + '.';
+    registrarDecision(d, partes.join(' · '), feedback, imp);
+    aplicarRonda(imp);
   });
 }
 
@@ -916,7 +1027,7 @@ function elegirOpcion(i) {
   const d = escenario.dilemas[dilemmaIndex];
   const op = d.opciones[i];
   registrarDecision(d, op.texto, op.feedback, op.impactos);
-  aplicarImpactos(op.impactos);
+  aplicarRonda(op.impactos);
 }
 
 function registrarDecision(d, eleccion, feedback, impactos) {
@@ -929,11 +1040,10 @@ function registrarDecision(d, eleccion, feedback, impactos) {
   });
 }
 
-function aplicarImpactos(impactos) {
+function aplicarRonda(impactos) {
   KPI_KEYS.forEach(k => {
     kpis[k] = Math.min(100, Math.max(0, kpis[k] + impactos[k]));
   });
-  renderKPIs();
   const impactsDiv = document.getElementById('modal-impacts');
   impactsDiv.innerHTML = '';
   KPI_KEYS.forEach(k => {
@@ -943,23 +1053,44 @@ function aplicarImpactos(impactos) {
     chip.textContent = KPI_LABELS[k] + ': ' + signo(delta);
     impactsDiv.appendChild(chip);
   });
-  document.getElementById('modal-feedback').textContent = historial[historial.length - 1].feedback;
+  document.getElementById('modal-feedback').innerHTML = historial[historial.length - 1].feedback;
   document.getElementById('modal-backdrop').style.display = 'flex';
+  renderKPIs();
+  guardarEstadoJuego();
 }
 
-/* ============================================================
-   INFORME DIDÁCTICO POST-DILEMAS
-   ============================================================ */
-function mostrarDebrief() {
+document.getElementById('modal-btn').addEventListener('click', () => {
+  document.getElementById('modal-backdrop').style.display = 'none';
+  const colapso = KPI_KEYS.find(k => kpis[k] <= UMBRAL_COLAPSO);
+  if (colapso) { mostrarDebrief('colapso', colapso); return; }
+  const rachaFatal = KPI_KEYS.find(k => {
+    if (kpis[k] < UMBRAL_VIGILANCIA) { racha[k]++; return racha[k] >= RACHA_MAXIMA; }
+    racha[k] = 0; return false;
+  });
+  if (rachaFatal) { mostrarDebrief('racha', rachaFatal); return; }
+  dilemmaIndex++;
+  if (dilemmaIndex >= escenario.dilemas.length) {
+    mostrarDebrief('victoria', null);
+  } else {
+    renderDilemma();
+  }
+});
+
+function mostrarDebrief(estado, kpiFatal) {
   gameOver = true;
-  victoria = KPI_KEYS.every(k => kpis[k] > 0);
+  victoria = estado === 'victoria';
+  window.__kpiFatal = kpiFatal;
+  window.__estadoFinal = estado;
+  if (!victoria && estadoInicial) {
+    localStorage.setItem('emba_estado_juego', JSON.stringify(estadoInicial));
+  }
   document.getElementById('screen-game').style.display = 'none';
   const list = document.getElementById('debrief-list');
   list.innerHTML = '';
   historial.forEach(h => {
     const item = document.createElement('div');
     item.className = 'debrief-item';
-    item.innerHTML = '<h4>Dilema ' + h.numero + ' — Decidiste: ' + h.eleccion.slice(0, 120) + (h.eleccion.length > 120 ? '…' : '') + '</h4>' +
+    item.innerHTML = '<h4>Dilema ' + h.numero + ' — Decidiste: ' + h.eleccion.slice(0, 130) + (h.eleccion.length > 130 ? '…' : '') + '</h4>' +
       '<div class="debrief-concept">📚 Teoría aplicada: ' + h.concepto + '</div>';
     const chips = document.createElement('div');
     chips.className = 'impacts';
@@ -972,7 +1103,7 @@ function mostrarDebrief() {
     });
     item.appendChild(chips);
     const p = document.createElement('p');
-    p.textContent = h.feedback;
+    p.innerHTML = h.feedback;
     item.appendChild(p);
     list.appendChild(item);
   });
@@ -982,20 +1113,6 @@ function mostrarDebrief() {
 document.getElementById('btn-go-result').addEventListener('click', () => {
   document.getElementById('screen-debrief').style.display = 'none';
   mostrarResultado();
-});
-
-document.getElementById('modal-btn').addEventListener('click', () => {
-  document.getElementById('modal-backdrop').style.display = 'none';
-  if (KPI_KEYS.some(k => kpis[k] <= 0)) {
-    mostrarDebrief();
-    return;
-  }
-  dilemmaIndex++;
-  if (dilemmaIndex >= escenario.dilemas.length) {
-    mostrarDebrief();
-  } else {
-    renderDilemma();
-  }
 });
 
 function mostrarResultado() {
@@ -1009,49 +1126,60 @@ function mostrarResultado() {
     const box = document.createElement('div');
     box.className = 'kpi';
     box.innerHTML = '<div class="label">' + KPI_LABELS[k] + '</div><div class="value">' +
-      Math.round(Math.max(0, kpis[k])) + '%</div>';
+      Math.round(kpis[k]) + '%</div>';
     fk.appendChild(box);
   });
   lessons.innerHTML = '';
-  document.getElementById('btn-retry').style.display = victoria ? 'none' : 'block';
-  document.getElementById('btn-return').textContent = victoria ? 'Regresar al Mapa de Ruta' : 'Abandonar y volver al Mapa';
   if (victoria) {
-    title.textContent = '✅ Etapa ' + escenario.etapa + ' Superada';
+    estabilizarEntreEtapas();
+    guardarEstadoJuego();
+    registrarAvanceLocal();
+    title.textContent = '✅ Trimestre superado — ' + EMPRESA + ' sigue viva';
     title.className = 'result-title win';
-    msg.textContent = 'Has liderado ' + escenario.empresa + ' superando los 3 dilemas de ' + escenario.sector +
-      ' en un contexto de ' + escenario.contexto.toLowerCase() + ', manteniendo todos tus KPIs por encima del 0%. Dominio demostrado del tema: ' + escenario.tema + '.';
+    const prox = escenario.etapa < 100 ? escenario.etapa + 1 : null;
+    msg.innerHTML = 'Has completado la Etapa ' + escenario.etapa + ' (' + escenario.tema + ') con los cuatro indicadores fuera de zona de riesgo. ' +
+      'La empresa se estabiliza entre etapas (los KPIs revierten ligeramente hacia el 50%) y <b>estos valores se heredan en la siguiente etapa</b>.' +
+      (prox ? ' Siguiente: Etapa ' + prox + ' · ' + MODULO_ICONO[moduloDeEtapa(prox)] + ' ' + moduloDeEtapa(prox) + ' — ' + temaDeEtapa(prox).tema : '');
+    document.getElementById('btn-next').style.display = prox ? 'block' : 'none';
+    document.getElementById('btn-retry').style.display = 'none';
     [
-      'Toda decisión ejecutiva es una decisión de trade-offs: no existe la opción que optimice los cuatro KPIs a la vez.',
-      'La velocidad de respuesta importa, pero sin diagnóstico previo es reactividad, no estrategia.',
-      'En contextos de ' + escenario.contexto.toLowerCase() + ', proteger la caja y al talento clave es la condición para poder atacar después.',
-      'La crisis reordena la industria de ' + escenario.sector + ': quien consolida aprendizaje estructural captura la posición del que desaparece.',
-      '"' + escenario.tema + '" deja de ser teoría cuando se convierte en el criterio explícito para elegir dónde competir y dónde no.'
+      'Toda decisión ejecutiva es trade-off: ninguna opción optimiza los cuatro KPIs a la vez.',
+      'Las herencias se acumulan: el estado con el que llega cada etapa es consecuencia de todas las anteriores.',
+      'Vigilar las rachas importa tanto como vigilar los niveles: el deterioro gradual también mata.',
+      '"' + escenario.tema + '" solo deja de ser teoría cuando se convierte en criterio explícito de decisión.'
     ].forEach(l => {
       const li = document.createElement('li');
       li.textContent = l;
       lessons.appendChild(li);
     });
   } else {
-    const muerto = KPI_KEYS.find(k => kpis[k] <= 0);
-    title.textContent = '❌ Destituido';
+    title.textContent = '❌ Destituido — el consejo pierde la confianza';
     title.className = 'result-title lose';
-    msg.textContent = 'El consejo de administración de ' + escenario.empresa + ' ha decidido relevarte del cargo. Tu indicador de ' +
-      KPI_LABELS_CORTOS[muerto] + ' colapsó al 0% (o menos). En un entorno de ' + escenario.contexto.toLowerCase() +
-      ', las decisiones que sacrifican un indicador crítico sin tesis de recuperación acaban en quiebra: sin margen, sin capacidad operativa, sin equipo o sin reputación, el modelo de ' +
-      escenario.sector + ' deja de ser viable. Puedes reintentar el mismo desafío académico (' + escenario.tema + ') en un escenario completamente distinto.';
+    if (window.__estadoFinal === 'colapso') {
+      msg.innerHTML = 'Tu <b>' + KPI_LABELS_CORTOS[window.__kpiFatal] + '</b> colapsó al ' + Math.round(kpis[window.__kpiFatal]) +
+        '% (umbral crítico: ' + UMBRAL_COLAPSO + '%). Dejar que un indicador esencial toque zona crítica equivale a firmar la salida: sin margen, sin capacidad operativa, sin equipo o sin reputación, el modelo deja de ser viable. Puedes repetir este trimestre desde la situación inicial en la que empezó.';
+    } else {
+      msg.innerHTML = 'Tu <b>' + KPI_LABELS_CORTOS[window.__kpiFatal] + '</b> pasó <b>' + RACHA_MAXIMA + ' rondas seguidas por debajo del 40%</b>. ' +
+        'El deterioro prolongado agota la confianza del consejo aunque ningún indicador haya colapsado todavía: una empresa que vive demasiado tiempo en zona de vigilancia termina cayendo. Reintenta el trimestre desde la situación inicial en la que empezó.';
+    }
+    document.getElementById('btn-next').style.display = 'none';
+    document.getElementById('btn-retry').style.display = 'block';
   }
 }
 
-/* ============================================================
-   REINTENTO: MISMO TEMA, NUEVO ESCENARIO ALEATORIO
-   ============================================================ */
 document.getElementById('btn-retry').addEventListener('click', () => {
+  if (estadoInicial) {
+    localStorage.setItem('emba_estado_juego', JSON.stringify(estadoInicial));
+  }
   cargarEtapa(escenario.etapa);
 });
 
-/* ============================================================
-   REGISTRO DE AVANCE EN .JSON (LOCAL + DESCARGA + CLOUD)
-   ============================================================ */
+document.getElementById('btn-next').addEventListener('click', () => {
+  const prox = escenario.etapa + 1;
+  localStorage.setItem('emba_etapa_seleccionada', String(prox));
+  cargarEtapa(prox);
+});
+
 function registrarAvanceLocal() {
   const etapa = escenario.etapa;
   let progreso = null;
@@ -1063,10 +1191,12 @@ function registrarAvanceLocal() {
   if (!progreso.etapas_completadas.includes(etapa)) {
     progreso.etapas_completadas.push(etapa);
     progreso.puntuacion_global = (progreso.puntuacion_global || 0) + 100;
-    progreso.ultima_etapa = etapa;
-    progreso.fecha_actualizacion = new Date().toISOString();
-    localStorage.setItem('emba_progreso', JSON.stringify(progreso));
   }
+  progreso.ultima_etapa = etapa;
+  progreso.fecha_actualizacion = new Date().toISOString();
+  progreso.kpis_empresa = kpis;
+  progreso.fase_empresa = escenario.fase.nombre;
+  localStorage.setItem('emba_progreso', JSON.stringify(progreso));
   return progreso;
 }
 
@@ -1086,55 +1216,11 @@ function exportarAvanceJSON() {
 
 document.getElementById('btn-export').addEventListener('click', exportarAvanceJSON);
 
-/* ============================================================
-   PERSISTENCIA LOCAL Y SINCRONIZACIÓN CLOUD (GitHub)
-   ============================================================ */
-async function sincronizarProgreso() {
-  const status = document.getElementById('sync-status');
-  const progreso = registrarAvanceLocal();
-
-  const token = localStorage.getItem('emba_github_token');
-  const sha = localStorage.getItem('emba_github_sha');
-  if (token && progreso && progreso.jugador_clave) {
-    try {
-      status.textContent = 'Sincronizando progreso con la nube…';
-      const body = {
-        message: 'Etapa ' + escenario.etapa + ' completada — EMBA Game',
-        content: btoa(unescape(encodeURIComponent(JSON.stringify(progreso))))
-      };
-      if (sha) body.sha = sha;
-      const resp = await fetch(
-        'github.com_' + progreso.jugador_clave + '.json',
-        {
-          method: 'PUT',
-          headers: { 'Authorization': 'token ' + token, 'Content-Type': 'application/json' },
-          body: JSON.stringify(body)
-        }
-      );
-      const resultado = await resp.json();
-      if (resp.ok && resultado.content && resultado.content.sha) {
-        localStorage.setItem('emba_github_sha', resultado.content.sha);
-        status.textContent = 'Progreso sincronizado correctamente.';
-      } else {
-        status.textContent = 'No se pudo sincronizar con la nube (se conserva el progreso local).';
-      }
-    } catch (e) {
-      status.textContent = 'No se pudo sincronizar con la nube (se conserva el progreso local).';
-    }
-  }
+document.getElementById('btn-return').addEventListener('click', () => {
   localStorage.removeItem('emba_etapa_seleccionada');
-  setTimeout(() => { window.location.href = 'index.html'; }, 800);
-}
-
-
-document.getElementById('btn-return').addEventListener('click', async () => {
-  if (victoria) {
-    await sincronizarProgreso();
-  } else {
-    localStorage.removeItem('emba_etapa_seleccionada');
-    window.location.href = 'index.html';
-  }
+  window.location.href = 'index.html';
 });
+
 </script>
 </body>
 </html>
