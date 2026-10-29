@@ -1,0 +1,658 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>EMBA Game — Motor de Decisiones Estratégicas</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    background: #0a0f1d;
+    color: #e2e8f0;
+    font-family: 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  .header {
+    width: 100%;
+    max-width: 960px;
+    padding: 24px 20px 8px;
+    text-align: center;
+  }
+  .header h1 {
+    font-size: 1.35rem;
+    font-weight: 600;
+    letter-spacing: .5px;
+  }
+  .header .modulo {
+    color: #00f2fe;
+    font-size: .8rem;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin-top: 6px;
+  }
+  .header .stage-meta {
+    color: #94a3b8;
+    font-size: .8rem;
+    margin-top: 6px;
+    line-height: 1.6;
+  }
+  .kpis {
+    width: 100%;
+    max-width: 960px;
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+    padding: 14px 20px 20px;
+  }
+  .kpi {
+    background: #161f38;
+    border: 1px solid #232f52;
+    border-radius: 12px;
+    padding: 14px 10px;
+    text-align: center;
+    transition: border-color .3s;
+  }
+  .kpi.low { border-color: #ef4444; box-shadow: 0 0 14px rgba(239,68,68,.2); }
+  .kpi .label { font-size: .72rem; color: #94a3b8; margin-bottom: 6px; }
+  .kpi .value { font-size: 1.5rem; font-weight: 700; color: #00f2fe; }
+  .kpi.low .value { color: #ef4444; }
+  .screen { width: 100%; max-width: 960px; padding: 0 20px 40px; }
+  .card {
+    background: #161f38;
+    border: 1px solid #232f52;
+    border-radius: 16px;
+    padding: 28px;
+    margin-bottom: 18px;
+  }
+  .dilemma-tag {
+    display: inline-block;
+    background: rgba(0,242,254,.1);
+    color: #00f2fe;
+    border: 1px solid rgba(0,242,254,.4);
+    border-radius: 999px;
+    padding: 4px 14px;
+    font-size: .75rem;
+    letter-spacing: 1px;
+    margin-bottom: 16px;
+  }
+  .narrative { font-size: 1rem; line-height: 1.7; color: #e2e8f0; margin-bottom: 22px; }
+  .options { display: flex; flex-direction: column; gap: 14px; }
+  .option {
+    background: #0f1730;
+    border: 1px solid #2b3a63;
+    border-radius: 12px;
+    padding: 18px 20px;
+    text-align: left;
+    color: #e2e8f0;
+    font-size: .95rem;
+    line-height: 1.55;
+    cursor: pointer;
+    transition: border-color .2s, transform .15s, background .2s;
+    font-family: inherit;
+  }
+  .option:hover { border-color: #00f2fe; transform: translateY(-2px); background: #111c3a; }
+  .modal-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(4,8,20,.78);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    z-index: 50;
+  }
+  .modal {
+    background: #161f38;
+    border: 1px solid #00f2fe;
+    border-radius: 16px;
+    max-width: 580px;
+    width: 100%;
+    padding: 26px;
+    box-shadow: 0 0 40px rgba(0,242,254,.22);
+  }
+  .modal h3 { color: #00f2fe; margin-bottom: 12px; font-size: 1.05rem; letter-spacing: .5px; }
+  .modal p { line-height: 1.65; font-size: .93rem; margin-bottom: 10px; }
+  .impacts { margin: 14px 0; display: flex; flex-wrap: wrap; gap: 8px; }
+  .impact { border-radius: 999px; padding: 5px 12px; font-size: .8rem; font-weight: 600; border: 1px solid; }
+  .impact.up { color: #22c55e; border-color: rgba(34,197,94,.5); background: rgba(34,197,94,.08); }
+  .impact.down { color: #ef4444; border-color: rgba(239,68,68,.5); background: rgba(239,68,68,.08); }
+  .modal button {
+    margin-top: 8px;
+    background: #00f2fe;
+    color: #0a0f1d;
+    border: none;
+    border-radius: 10px;
+    padding: 12px 22px;
+    font-weight: 700;
+    font-size: .9rem;
+    cursor: pointer;
+    font-family: inherit;
+  }
+  .modal button:hover { background: #6ff7ff; }
+  .result-title { font-size: 2rem; font-weight: 800; text-align: center; margin-bottom: 18px; letter-spacing: 1px; }
+  .result-title.win { color: #22c55e; text-shadow: 0 0 24px rgba(34,197,94,.4); }
+  .result-title.lose { color: #ef4444; text-shadow: 0 0 24px rgba(239,68,68,.4); }
+  .lessons { list-style: none; margin: 14px 0 4px; }
+  .lessons li { padding: 10px 0 10px 26px; position: relative; line-height: 1.6; font-size: .93rem; border-bottom: 1px solid #232f52; }
+  .lessons li::before { content: '✓'; position: absolute; left: 0; color: #00f2fe; font-weight: 700; }
+  .final-kpis { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin: 18px 0; }
+  .btn-main {
+    display: block;
+    margin: 22px auto 0;
+    background: #00f2fe;
+    color: #0a0f1d;
+    border: none;
+    border-radius: 12px;
+    padding: 14px 30px;
+    font-weight: 700;
+    font-size: 1rem;
+    cursor: pointer;
+    font-family: inherit;
+    transition: background .2s;
+  }
+  .btn-main:hover { background: #6ff7ff; }
+  .btn-main.btn-retry { background: #ef4444; color: #fff; }
+  .btn-main.btn-retry:hover { background: #ff6b6b; }
+  .status-line { text-align: center; color: #94a3b8; font-size: .8rem; margin-top: 12px; min-height: 1.2em; }
+  @media (max-width: 640px) {
+    .kpis, .final-kpis { grid-template-columns: repeat(2, 1fr); }
+    .header h1 { font-size: 1.05rem; }
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1 id="stage-title">Cargando escenario ejecutivo…</h1>
+  <div class="modulo" id="stage-modulo"></div>
+  <div class="stage-meta" id="stage-meta"></div>
+</div>
+
+<div class="kpis">
+  <div class="kpi" id="kpi-finanzas">
+    <div class="label">💰 Finanzas</div>
+    <div class="value" id="val-finanzas">50%</div>
+  </div>
+  <div class="kpi" id="kpi-operaciones">
+    <div class="label">⚙️ Operaciones</div>
+    <div class="value" id="val-operaciones">50%</div>
+  </div>
+  <div class="kpi" id="kpi-talento">
+    <div class="label">👥 Capital Humano</div>
+    <div class="value" id="val-talento">50%</div>
+  </div>
+  <div class="kpi" id="kpi-mercado">
+    <div class="label">📈 Mercado y Reputación</div>
+    <div class="value" id="val-mercado">50%</div>
+  </div>
+</div>
+
+<div class="screen">
+  <div id="screen-game">
+    <div class="card" id="dilemma-card">
+      <span class="dilemma-tag" id="dilemma-tag">Dilema 1 de 3</span>
+      <p class="narrative" id="dilemma-narrative"></p>
+      <div class="options" id="options-container"></div>
+    </div>
+  </div>
+
+  <div id="screen-result" style="display:none;">
+    <div class="card">
+      <div class="result-title" id="result-title"></div>
+      <p class="narrative" id="result-message"></p>
+      <div class="final-kpis" id="final-kpis"></div>
+      <ul class="lessons" id="result-lessons"></ul>
+      <button class="btn-main btn-retry" id="btn-retry">Reintentar Desafío Ejecutivo</button>
+      <button class="btn-main" id="btn-return">Regresar al Mapa de Ruta</button>
+      <div class="status-line" id="sync-status"></div>
+    </div>
+  </div>
+</div>
+
+<div class="modal-backdrop" id="modal-backdrop" style="display:none;">
+  <div class="modal">
+    <h3 id="modal-title">Consecuencias de tu decisión</h3>
+    <p id="modal-feedback"></p>
+    <div class="impacts" id="modal-impacts"></div>
+    <button id="modal-btn">Continuar</button>
+  </div>
+</div>
+
+<script>
+const TEMAS_EMBA = {
+    1: { modulo: "Estrategia", tema: "Ventaja Competitiva y Posicionamiento (Michael Porter)" },
+    2: { modulo: "Estrategia", tema: "Estrategia del Océano Azul y Creación de Nuevos Mercados" },
+    3: { modulo: "Estrategia", tema: "Análisis de Recursos, Capacidades y Ventaja Sostenible (VRIO)" },
+    4: { modulo: "Estrategia", tema: "Disrupción Tecnológica y Dilema del Innovador (Clayton Christensen)" },
+    5: { modulo: "Estrategia", tema: "Estrategias de Crecimiento: Matriz de Ansoff" },
+    6: { modulo: "Estrategia", tema: "Integración Vertical vs Sourcing Estratégico (Hacer o Comprar)" },
+    7: { modulo: "Estrategia", tema: "Fusiones y Adquisiciones (M&A): Sinergias Corporativas" },
+    8: { modulo: "Estrategia", tema: "Alianzas Estratégicas y Joint Ventures Internacionales" },
+    9: { modulo: "Estrategia", tema: "Estrategias de Plataforma y Efectos de Red (Network Effects)" },
+    10: { modulo: "Estrategia", tema: "Teoría de Juegos Aplicada a la Competencia (Equilibrio de Nash)" },
+    11: { modulo: "Estrategia", tema: "Modelos de Negocio SaaS y Escalabilidad de Margen Bruto" },
+    12: { modulo: "Estrategia", tema: "Globalización: Adaptación Local vs Estandarización Global (Glocal)" },
+    13: { modulo: "Estrategia", tema: "Gestión del Cambio Organizacional (Modelo de 8 Pasos de Kotter)" },
+    14: { modulo: "Estrategia", tema: "Gobierno Corporativo, Activismo de Inversores y Consejo de Administración" },
+    15: { modulo: "Estrategia", tema: "Sostenibilidad Estratégica, Criterios ESG y Triple Balance" },
+    16: { modulo: "Estrategia", tema: "Gestión de Riesgos Geopolíticos y Resiliencia Corporativa" },
+    17: { modulo: "Estrategia", tema: "Planificación de Escenarios Futuros y Agilidad Estratégica" },
+    18: { modulo: "Estrategia", tema: "Ecosistemas de Innovación Abierta y Venture Building Corporativo" },
+    19: { modulo: "Estrategia", tema: "Estrategias de Salida (Exit): Salida a Bolsa (IPO) vs Venta Estratégica" },
+    20: { modulo: "Estrategia", tema: "Liderazgo en Tiempos de Crisis y Gestión de Turnaround Empresarial" },
+    21: { modulo: "Finanzas", tema: "Análisis de Estados Financieros: Balance y Cuenta de Resultados" },
+    22: { modulo: "Finanzas", tema: "Gestión de Tesorería, Optimización del Flujo de Caja y Capital de Trabajo" },
+    23: { modulo: "Finanzas", tema: "Cálculo del Coste de Capital (WACC) y Estructura de Capital Óptima" },
+    24: { modulo: "Finanzas", tema: "Presupuestación de Capital y Evaluación de Proyectos (VAN y TIR)" },
+    25: { modulo: "Finanzas", tema: "Valoración de Empresas: Descuento de Flujos de Caja (DCF) vs Múltiplos" },
+    26: { modulo: "Finanzas", tema: "Apalancamiento Financiero y Gestión del Riesgo de Crédito" },
+    27: { modulo: "Finanzas", tema: "Financiación de Startups: Rondas de Inversión y Dilución" },
+    28: { modulo: "Finanzas", tema: "Venture Capital vs Private Equity: Estructuración de Deals" },
+    29: { modulo: "Finanzas", tema: "Dividendos y Recompra de Acciones: Política de Retribución" },
+    30: { modulo: "Finanzas", tema: "Contabilidad de Costes: Costes Fijos, Variables y Punto de Equilibrio" },
+    31: { modulo: "Finanzas", tema: "Auditoría Interna, Control de Gestión y Prevención del Fraude" },
+    32: { modulo: "Finanzas", tema: "Mercados de Capitales: Emisión de Deuda, Bonos y Financiación" },
+    33: { modulo: "Finanzas", tema: "Estrategias de Cobertura Financiera (Hedging) con Derivados" },
+    34: { modulo: "Finanzas", tema: "Finanzas Internacionales: Repatriación de Capitales" },
+    35: { modulo: "Finanzas", tema: "Project Finance y Financiación de Grandes Infraestructuras" },
+    36: { modulo: "Finanzas", tema: "Estructuras Fiscales Eficientes y Planificación Fiscal Corporativa" },
+    37: { modulo: "Finanzas", tema: "Reestructuración de Deuda y Concurso de Acreedores" },
+    38: { modulo: "Finanzas", tema: "Activos Digitales, Blockchain y la Tokenización Financiera" },
+    39: { modulo: "Finanzas", tema: "Finanzas Conductuales (Behavioral Finance) en Decisiones" },
+    40: { modulo: "Finanzas", tema: "Modelización Financiera Avanzada y Análisis de Sensibilidad" },
+    41: { modulo: "Marketing", tema: "Segmentación de Mercado, Targeting y Posicionamiento" },
+    42: { modulo: "Marketing", tema: "Estrategias de Fijación de Precios (Pricing): Valor vs Coste" },
+    43: { modulo: "Marketing", tema: "Customer Lifetime Value (CLV) vs Customer Acquisition Cost (CAC)" },
+    44: { modulo: "Marketing", tema: "Estrategias de Branding, Arquitectura de Marca y Brand Equity" },
+    45: { modulo: "Marketing", tema: "Inbound Marketing, Growth Hacking y Embudos de Conversión" },
+    46: { modulo: "Marketing", tema: "Marketing Omnicanal y Gestión de Canales (Go-To-Market)" },
+    47: { modulo: "Marketing", tema: "Lanzamiento de Nuevos Productos (NPD) y Metodología Stage-Gate" },
+    48: { modulo: "Marketing", tema: "Product-Market Fit y Estrategias de Retención de Clientes" },
+    49: { modulo: "Marketing", tema: "Gestión de la Experiencia del Cliente (CX) y Net Promoter Score" },
+    50: { modulo: "Marketing", tema: "Marketing de Redes Sociales, Viralidad y Creadores" },
+    51: { modulo: "Marketing", tema: "B2B Marketing: Gestión de Grandes Cuentas (Key Account)" },
+    52: { modulo: "Marketing", tema: "Neuromarketing y Psicología del Consumidor en Decisiones" },
+    53: { modulo: "Marketing", tema: "Estrategias de Trade Marketing y Gestión de Retail" },
+    54: { modulo: "Marketing", tema: "Publicidad Programática, Atribución y Modelos MMM" },
+    55: { modulo: "Marketing", tema: "Marketing Internacional y Barreras Culturales en Nuevos Mercados" },
+    56: { modulo: "Marketing", tema: "Gestión de Crisis de Reputación de Marca en Entornos Digitales" },
+    57: { modulo: "Marketing", tema: "Estrategias de Relaciones Públicas y Liderazgo de Opinión" },
+    58: { modulo: "Marketing", tema: "Modelos de Suscripción y Economía de la Recurrencia" },
+    59: { modulo: "Marketing", tema: "Inteligencia de Mercado, Big Data y Analítica Predictiva" },
+    60: { modulo: "Marketing", tema: "Estrategias de Defendibilidad de Mercado frente a Imitadores" },
+    61: { modulo: "Operaciones", tema: "Gestión de Procesos: Análisis de Cuellos de Botella y Ley de Little" },
+    62: { modulo: "Operaciones", tema: "Lean Management, Desperdicios (Muda) y Filosofía Kaizen" },
+    63: { modulo: "Operaciones", tema: "Seis Sigma (Six Sigma): Calidad Total y Control Estadístico" },
+    64: { modulo: "Operaciones", tema: "Diseño y Resiliencia de la Cadena de Suministro Global" },
+    65: { modulo: "Operaciones", tema: "Gestión de Inventarios: Modelo EOQ frente a Just-in-Time" },
+    66: { modulo: "Operaciones", tema: "Logística Inversa y Economía Circular en Operaciones" },
+    67: { modulo: "Operaciones", tema: "Automatización Industrial, Robótica Avanzada e Industria 4.0" },
+    68: { modulo: "Operaciones", tema: "Implementación de Sistemas ERP y CRM en la Integración" },
+    69: { modulo: "Operaciones", tema: "Subcontratación Estratégica (Outsourcing) y Gestión de Proveedores" },
+    70: { modulo: "Operaciones", tema: "Gestión de la Capacidad y Planificación Agregada" },
+    71: { modulo: "Operaciones", tema: "Inteligencia Artificial Aplicada a la Optimización Predictiva" },
+    72: { modulo: "Operaciones", tema: "Transformación Digital de Infraestructuras Tradicionales" },
+    73: { modulo: "Operaciones", tema: "Gestión de Proyectos Críticos: Agile (Scrum/Kanban) vs Waterfall" },
+    74: { modulo: "Operaciones", tema: "Ciberseguridad Corporativa, Continuidad del Negocio y Planes DR" },
+    75: { modulo: "Operaciones", tema: "Sostenibilidad Operativa: Descarbonización de la Cadena de Valor" },
+    76: { modulo: "Operaciones", tema: "Compras Globales, Aranceles y Aduanas Internacionales" },
+    77: { modulo: "Operaciones", tema: "Diseño de Servicios de Alta Disponibilidad y Acuerdos SLA" },
+    78: { modulo: "Operaciones", tema: "Mantenimiento Predictivo mediante IoT (Internet de las Cosas)" },
+    79: { modulo: "Operaciones", tema: "Escalabilidad Operativa: De Startup Local a Multiregional" },
+    80: { modulo: "Operaciones", tema: "Gobernanza de Datos y Ética en la Implementación de IA" },
+    81: { modulo: "Capital Humano", tema: "Diseño Organizacional, Estructuras Matriciales y Reporte" },
+    82: { modulo: "Capital Humano", tema: "Cultura Organizacional como Ventaja Competitiva" },
+    83: { modulo: "Capital Humano", tema: "Atracción y Retención de Talento: Planes de Carrera e Incentivos" },
+    84: { modulo: "Capital Humano", tema: "Modelos de Compensación: Variables, Stock Options y Phantom Shares" },
+    85: { modulo: "Capital Humano", tema: "Evaluación del Desempeño, Feedback 360 y High Potentials" },
+    86: { modulo: "Capital Humano", tema: "Gestión de Equipos Multiculturales y Remotos Globales" },
+    87: { modulo: "Capital Humano", tema: "Resolución de Conflictos Laborales y Negociación Colectiva" },
+    88: { modulo: "Capital Humano", tema: "Técnicas de Negociación Avanzada: Método de Harvard" },
+    89: { modulo: "Capital Humano", tema: "Liderazgo Ejecutivo, Estilos de Mando e Inteligencia Emocional" },
+    90: { modulo: "Capital Humano", tema: "Planes de Sucesión de la Alta Dirección y Transiciones de CEOs" },
+    91: { modulo: "Capital Humano", tema: "Diversidad, Equidad e Inclusión (DEI) como Motor de Innovación" },
+    92: { modulo: "Capital Humano", tema: "Estrés Ejecutivo, Burnout y Programas de Bienestar Corporativo" },
+    93: { modulo: "Capital Humano", tema: "People Analytics: Uso de Datos para Optimización de Plantillas" },
+    94: { modulo: "Capital Humano", tema: "Liderazgo Inspiracional, Storytelling y Comunicación de Impacto" },
+    95: { modulo: "Capital Humano", tema: "Gestión de Despidos Masivos (Layoffs) y Outplacement Ético" },
+    96: { modulo: "Capital Humano", tema: "Estrategias de Formación Continua (Upskilling y Reskilling)" },
+    97: { modulo: "Capital Humano", tema: "Estructuración de Equipos de Alto Rendimiento y Células Ágiles" },
+    98: { modulo: "Capital Humano", tema: "Psicología Organizacional y Gestión de la Resistencia al Cambio" },
+    99: { modulo: "Capital Humano", tema: "Liderazgo Ético, Cumplimiento Normativo (Compliance) y Conducta" },
+    100: { modulo: "Capital Humano", tema: "El Futuro del Trabajo: Modelos Híbridos, Automatización y el CEO" }
+};
+
+const SECTORES = [
+  { nombre: 'Fintech de Microcréditos', empresa: 'Creditia' },
+  { nombre: 'Aeroespacial', empresa: 'AeroLink Industries' },
+  { nombre: 'Biotecnología', empresa: 'BioNexa Therapeutics' },
+  { nombre: 'Logística Automatizada', empresa: 'CargoMind Logistics' },
+  { nombre: 'Energías Renovables', empresa: 'Voltia Renewables' }
+];
+const CONTEXTOS = [
+  'Alta inflación con subida de tipos',
+  'Recesión inminente',
+  'Boom de inversión de capital',
+  'Proteccionismo comercial'
+];
+const EVENTOS = [
+  'Un competidor agresivo copia el producto y lo lanza a un 40% menos de precio',
+  'Nueva regulación gubernamental estricta que recorta márgenes y exige auditorías trimestrales',
+  'Filtración masiva de datos de clientes que salpica a toda la industria',
+  'Huelga en la cadena de distribución que paraliza el 30% de las entregas'
+];
+
+const KPI_KEYS = ['finanzas', 'operaciones', 'talento', 'mercado'];
+const KPI_LABELS = {
+  finanzas: '💰 Finanzas',
+  operaciones: '⚙️ Operaciones',
+  talento: '👥 Capital Humano',
+  mercado: '📈 Mercado'
+};
+const KPI_LABELS_CORTOS = {
+  finanzas: 'Finanzas', operaciones: 'Operaciones', talento: 'Capital Humano', mercado: 'Mercado'
+};
+
+let escenario = null;
+let kpis = { finanzas: 50, operaciones: 50, talento: 50, mercado: 50 };
+let dilemmaIndex = 0;
+let gameOver = false;
+let victoria = false;
+
+/* ============================================================
+   DETECCIÓN AUTOMÁTICA DE NIVEL
+   ============================================================ */
+function detectarEtapa() {
+  const seleccionada = localStorage.getItem('emba_etapa_seleccionada');
+  if (seleccionada !== null) {
+    const n = parseInt(seleccionada, 10);
+    if (n >= 1 && n <= 100) return n;
+  }
+  try {
+    const progreso = JSON.parse(localStorage.getItem('emba_progreso'));
+    if (progreso && Array.isArray(progreso.etapas_completadas) && progreso.etapas_completadas.length) {
+      const maxima = Math.max.apply(null, progreso.etapas_completadas.filter(n => n >= 1 && n <= 100));
+      if (maxima < 100) return maxima + 1;
+    }
+  } catch (e) { /* progreso corrupto o inexistente */ }
+  return 1;
+}
+
+/* ============================================================
+   GENERADOR DINÁMICO DE DILEMAS
+   ============================================================ */
+function rnd(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
+function signo(n) { return n >= 0 ? '+' + n : String(n); }
+
+function generarEscenario(etapa) {
+  const tema = TEMAS_EMBA[etapa];
+  const sector = rnd(SECTORES);
+  const contexto = rnd(CONTEXTOS);
+  const evento = rnd(EVENTOS);
+  return {
+    etapa: etapa,
+    modulo: tema.modulo,
+    tema: tema.tema,
+    sector: sector.nombre,
+    empresa: sector.empresa,
+    contexto: contexto,
+    evento: evento,
+    dilemas: construirDilemas(tema, sector, contexto, evento)
+  };
+}
+
+function construirDilemas(tema, sector, contexto, evento) {
+  return [
+    {
+      narrativa: 'Diriges ' + sector.empresa + ', empresa de referencia en ' + sector.nombre +
+        '. El entorno macro cambió: ' + contexto.toLowerCase() + '. De repente, ' + evento +
+        '. Tu comité ejecutivo exige una respuesta inmediata y la ventana de decisión es de 48 horas. La cuestión de fondo es cómo aplicar los principios de "' + tema.tema + '" sin comprometer la continuidad del negocio.',
+      opciones: [
+        {
+          texto: 'Respuesta rápida y agresiva: movilizar todos los recursos disponibles para contener el impacto inmediato, incluso saturando a los equipos y aceptando sobrecostes importantes este trimestre.',
+          feedback: 'La velocidad sin análisis es reactividad, no estrategia. Contienes el fuego a corto plazo (algo de Mercado), pero los sobrecostes golpean Finanzas, la organización saturada pierde calidad operativa y el talento directivo quema horas extraordinarias sin plan de sostenibilidad. En ' + sector.nombre + ', una respuesta no priorizada según "' + tema.tema + '" solo traslada el problema al siguiente trimestre.',
+          impactos: { finanzas: -18, operaciones: -10, talento: -12, mercado: +8 }
+        },
+        {
+          texto: 'Respuesta estructurada: activar un comité de crisis que priorice los impactos según su criticidad, comunicar un plan de contingencia creíble a clientes e inversores y proteger la capacidad operativa y humana clave.',
+          feedback: 'Aplicas la disciplina directiva que exige "' + tema.tema + '": primero diagnosticar, luego priorizar, después actuar con la organización alineada. Contener el impacto sin destruir márgenes ni moral exige invertir en comunicación y coordinación (puntual coste en Finanzas), pero preserva la ejecución, la confianza interna y la reputación ante ' + contexto.toLowerCase() + '.',
+          impactos: { finanzas: -6, operaciones: +10, talento: +10, mercado: +10 }
+        }
+      ]
+    },
+    {
+      narrativa: 'Semana 3. En plena fase de ' + contexto.toLowerCase() + ', el efecto de "' + evento +
+        '" se agrava: dos directivos clave proponen decisiones opuestas. Uno defiende proteger el statu quo y esperar a que el entorno se estabilice; el otro pide transformar ahora el modelo aplicando "' + tema.tema +
+        '" con inversión intensiva, aunque suponga un periodo de dolor operativo y ajustes en la plantilla.',
+      opciones: [
+        {
+          texto: 'Mantener el statu quo: no arriesgar lo construido, esperar a que el entorno de ' + contexto.toLowerCase() + ' se estabilice antes de mover ficha.',
+          feedback: 'La parálisis ante shocks externos es una decisión en sí misma, y rara vez es la correcta. El competidor o el regulador no esperan: mientras conservas caja a corto plazo (puntual alivio en Finanzas), pierdes posicionamiento frente al mercado, tu mejor talento busca empresas con visión y la organización percibe falta de dirección. "' + tema.tema + '" exige anticipar, no observar.',
+          impactos: { finanzas: +6, operaciones: -6, talento: -14, mercado: -14 }
+        },
+        {
+          texto: 'Transformar ahora: aprobar la inversión y el plan de ajuste, con comunicación transparente, hitos medibles y protección explícita de los equipos críticos del modelo de ' + sector.nombre + '.',
+          feedback: 'Decisión valiente y alineada con "' + tema.tema + '": el momento de transformar es cuando aún tienes recursos, no cuando el mercado te obliga. La inversión puntual pesa en Finanzas y la ejecución exige mucho de Operaciones, pero la combinación de transparencia, hitos claros y protección del talento clave convierte el cambio en ventaja competitiva ante ' + contexto.toLowerCase() + '.',
+          impactos: { finanzas: -10, operaciones: +8, talento: +6, mercado: +14 }
+        }
+      ]
+    },
+    {
+      narrativa: 'Final del trimestre. La tormenta de "' + evento + '" ha dejado la industria de ' + sector.nombre +
+        ' reordenada: varios competidores han desaparecido y queda espacio para capturar cuota. Sin embargo, tu CFO advierte que la caja apenas da para una sola gran apuesta en medio de ' + contexto.toLowerCase() +
+        '. La junta directiva te pide elegir el movimiento final que defina tu legado en torno a "' + tema.tema + '".',
+      opciones: [
+        {
+          texto: 'Apuesta ofensiva por volumen: capturar cuota agresivamente con precios bajos y máxima inversión comercial, asumiendo pérdida de margen durante dos años.',
+          feedback: 'La captura de cuota a cualquier precio confunde crecimiento con rentabilidad. En ' + sector.nombre + ' y con ' + contexto.toLowerCase() + ', financiar cuota con margen negativo drena caja (Finanzas), fuerza a Operaciones a escalar sin red y el talento nota la presión. La cuota gana (Mercado sube), pero sin los fundamentos de "' + tema.tema + '" la posición es insostenible.',
+          impactos: { finanzas: -16, operaciones: -10, talento: -8, mercado: +14 }
+        },
+        {
+          texto: 'Apuesta por rentabilidad sostenible: consolidar la posición en los segmentos más rentables, consolidar el aprendizaje de la crisis en procesos y cultura, y construir una barrera defendible basada en "' + tema.tema + '".',
+          feedback: 'Cierre de nivel ejemplar: eliges dónde competir y dónde no, consolidas margen y conviertes la crisis en aprendizaje organizativo. Renuncias a cuota cosmética (Mercado sube moderadamente), pero refuerzas caja, disciplina operativa y orgullo interno. Es exactamente el núcleo de "' + tema.tema + '": ventaja defendible antes que tamaño.',
+          impactos: { finanzas: +14, operaciones: +10, talento: +8, mercado: +5 }
+        }
+      ]
+    }
+  ];
+}
+
+/* ============================================================
+   RENDER
+   ============================================================ */
+function renderKPIs() {
+  KPI_KEYS.forEach(k => {
+    const v = Math.round(kpis[k]);
+    document.getElementById('val-' + k).textContent = v + '%';
+    document.getElementById('kpi-' + k).classList.toggle('low', v <= 20);
+  });
+}
+
+function renderCabecera() {
+  document.getElementById('stage-title').textContent = 'Etapa ' + escenario.etapa + ' de 100 — ' + escenario.tema;
+  document.getElementById('stage-modulo').textContent = 'Módulo: ' + escenario.modulo;
+  document.getElementById('stage-meta').innerHTML =
+    'Sector: ' + escenario.sector + ' (' + escenario.empresa + ') · Contexto: ' + escenario.contexto;
+}
+
+function renderDilemma() {
+  const d = escenario.dilemas[dilemmaIndex];
+  document.getElementById('dilemma-tag').textContent =
+    'Dilema ' + (dilemmaIndex + 1) + ' de ' + escenario.dilemas.length;
+  document.getElementById('dilemma-narrative').textContent = d.narrativa;
+  const cont = document.getElementById('options-container');
+  cont.innerHTML = '';
+  d.opciones.forEach((op, i) => {
+    const btn = document.createElement('button');
+    btn.className = 'option';
+    btn.textContent = op.texto;
+    btn.addEventListener('click', () => elegirOpcion(i));
+    cont.appendChild(btn);
+  });
+}
+
+function elegirOpcion(i) {
+  if (gameOver) return;
+  const op = escenario.dilemas[dilemmaIndex].opciones[i];
+  KPI_KEYS.forEach(k => { kpis[k] = Math.min(100, Math.max(0, kpis[k] + op.impactos[k])); });
+  renderKPIs();
+  const impactsDiv = document.getElementById('modal-impacts');
+  impactsDiv.innerHTML = '';
+  KPI_KEYS.forEach(k => {
+    const delta = op.impactos[k];
+    const chip = document.createElement('span');
+    chip.className = 'impact ' + (delta >= 0 ? 'up' : 'down');
+    chip.textContent = KPI_LABELS[k] + ': ' + signo(delta);
+    impactsDiv.appendChild(chip);
+  });
+  document.getElementById('modal-feedback').textContent = op.feedback;
+  document.getElementById('modal-backdrop').style.display = 'flex';
+}
+
+document.getElementById('modal-btn').addEventListener('click', () => {
+  document.getElementById('modal-backdrop').style.display = 'none';
+  if (KPI_KEYS.some(k => kpis[k] <= 0)) {
+    terminarJuego(false);
+    return;
+  }
+  dilemmaIndex++;
+  if (dilemmaIndex >= escenario.dilemas.length) {
+    terminarJuego(true);
+  } else {
+    renderDilemma();
+  }
+});
+
+function terminarJuego(gano) {
+  gameOver = true;
+  victoria = gano;
+  document.getElementById('screen-game').style.display = 'none';
+  document.getElementById('screen-result').style.display = 'block';
+  const title = document.getElementById('result-title');
+  const msg = document.getElementById('result-message');
+  const lessons = document.getElementById('result-lessons');
+  const fk = document.getElementById('final-kpis');
+  fk.innerHTML = '';
+  KPI_KEYS.forEach(k => {
+    const box = document.createElement('div');
+    box.className = 'kpi';
+    box.innerHTML = '<div class="label">' + KPI_LABELS[k] + '</div><div class="value">' +
+      Math.round(Math.max(0, kpis[k])) + '%</div>';
+    fk.appendChild(box);
+  });
+  lessons.innerHTML = '';
+  document.getElementById('btn-retry').style.display = gano ? 'none' : 'block';
+  document.getElementById('btn-return').textContent = gano ? 'Regresar al Mapa de Ruta' : 'Abandonar y volver al Mapa';
+  if (gano) {
+    title.textContent = '✅ Etapa ' + escenario.etapa + ' Superada';
+    title.className = 'result-title win';
+    msg.textContent = 'Has liderado ' + escenario.empresa + ' superando los 3 dilemas de ' + escenario.sector +
+      ' en un contexto de ' + escenario.contexto.toLowerCase() + ', manteniendo todos tus KPIs por encima del 0%. Dominio demostrado del tema: ' + escenario.tema + '.';
+    [
+      'Toda decisión ejecutiva es una decisión de trade-offs: no existe la opción que optimice los cuatro KPIs a la vez.',
+      'La velocidad de respuesta importa, pero sin diagnóstico previo es reactividad, no estrategia.',
+      'En contextos de ' + escenario.contexto.toLowerCase() + ', proteger la caja y al talento clave es la condición para poder atacar después.',
+      'La crisis reordena la industria de ' + escenario.sector + ': quien consolida aprendizaje estructural captura la posición del que desaparece.',
+      '"' + escenario.tema + '" deja de ser teoría cuando se convierte en el criterio explícito para elegir dónde competir y dónde no.'
+    ].forEach(l => {
+      const li = document.createElement('li');
+      li.textContent = l;
+      lessons.appendChild(li);
+    });
+  } else {
+    const muerto = KPI_KEYS.find(k => kpis[k] <= 0);
+    title.textContent = '❌ Destituido';
+    title.className = 'result-title lose';
+    msg.textContent = 'El consejo de administración de ' + escenario.empresa + ' ha decidido relevarte del cargo. Tu indicador de ' +
+      KPI_LABELS_CORTOS[muerto] + ' colapsó al 0% (o menos). En un entorno de ' + escenario.contexto.toLowerCase() +
+      ', las decisiones que sacrifican un indicador crítico sin tesis de recuperación acaban en quiebra: sin margen, sin capacidad operativa, sin equipo o sin reputación, el modelo de ' +
+      escenario.sector + ' deja de ser viable. Puedes reintentar el mismo desafío académico (' + escenario.tema + ') en un escenario completamente distinto.';
+  }
+}
+
+/* ============================================================
+   REINTENTO: MISMO TEMA, NUEVO ESCENARIO ALEATORIO
+   ============================================================ */
+function iniciarNivel(etapa) {
+  escenario = generarEscenario(etapa);
+  kpis = { finanzas: 50, operaciones: 50, talento: 50, mercado: 50 };
+  dilemmaIndex = 0;
+  gameOver = false;
+  victoria = false;
+  document.getElementById('screen-result').style.display = 'none';
+  document.getElementById('screen-game').style.display = 'block';
+  document.getElementById('sync-status').textContent = '';
+  renderCabecera();
+  renderKPIs();
+  renderDilemma();
+}
+
+document.getElementById('btn-retry').addEventListener('click', () => {
+  iniciarNivel(escenario.etapa);
+});
+
+/* ============================================================
+   PERSISTENCIA LOCAL Y SINCRONIZACIÓN CLOUD (GitHub)
+   ============================================================ */
+async function sincronizarProgreso() {
+  const status = document.getElementById('sync-status');
+  const progreso = JSON.parse(localStorage.getItem('emba_progreso'));
+  if (progreso) {
+    const etapa = escenario.etapa;
+    if (!progreso.etapas_completadas || !progreso.etapas_completadas.includes(etapa)) {
+      progreso.etapas_completadas = progreso.etapas_completadas || [];
+      progreso.etapas_completadas.push(etapa);
+      progreso.puntuacion_global = (progreso.puntuacion_global || 0) + 100;
+      localStorage.setItem('emba_progreso', JSON.stringify(progreso));
+    }
+  }
+
+  const token = localStorage.getItem('emba_github_token');
+  const sha = localStorage.getItem('emba_github_sha');
+  if (token && progreso && progreso.jugador_clave) {
+    try {
+      status.textContent = 'Sincronizando progreso con la nube…';
+      const body = {
+        message: 'Etapa ' + escenario.etapa + ' completada — EMBA Game',
+        content: btoa(unescape(encodeURIComponent(JSON.stringify(progreso))))
+      };
+      if (sha) body.sha = sha;
+      const resp = await fetch(
+        'github.com_' + progreso.jugador_clave + '.json',
+        {
+          method: 'PUT',
+          headers: { 'Authorization': 'token ' + token, 'Content-Type': 'application/json' },
+          body: JSON.stringify(body)
+        }
+      );
+      const resultado = await resp.json();
+      if (resp.ok && resultado.content && resultado.content.sha) {
+        localStorage.setItem('emba_github_sha', resultado.content.sha);
+        status.textContent = 'Progreso sincronizado correctamente.';
+      } else {
+        status.textContent = 'No se pudo sincronizar con la nube (se conserva el progreso local).';
+      }
+    } catch (e) {
+      status.textContent = 'No se pudo sincronizar con la nube (se conserva el progreso local).';
+    }
+  }
+  localStorage.removeItem('emba_etapa_seleccionada');
+  setTimeout(() => { window.location.href = 'index.html'; }, 800);
+}
+
+document.getElementById('btn-return').addEventListener('click', async () => {
+  if (victoria) {
+    await sincronizarProgreso();
+  } else {
+    localStorage.removeItem('emba_etapa_seleccionada');
+    window.location.href = 'index.html';
+  }
+});
+
+iniciarNivel(detectarEtapa());
+</script>
+</body>
+</html>

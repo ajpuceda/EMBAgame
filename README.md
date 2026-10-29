@@ -5,7 +5,8 @@ Plan de estudios EMBA gamificado: etapas de toma de decisiones estratégicas en 
 ## Estructura
 
 - `index.html` — Mapa de ruta principal (menú de etapas, progreso del jugador).
-- `etapa1.html` — Etapa 1: Ventaja Competitiva de Porter y Diferenciación (Fintech de Microcréditos).
+- `juego.html` — Motor unificado de 100 niveles: detecta la etapa automáticamente (`emba_etapa_seleccionada` o mayor etapa completada en `emba_progreso`), genera el escenario aleatoriamente (sector, contexto macro, evento detonante) a partir del tema EMBA de la base `TEMAS_EMBA`, y permite reintentar el mismo tema con un escenario nuevo tras una derrota.
+- `etapa1.html` — Etapa 1 independiente (Ventaja Competitiva de Porter, Fintech de Microcréditos).
 
 ## Progreso
 
@@ -13,4 +14,4 @@ El progreso se guarda en `localStorage` bajo la clave `emba_progeso` (etapas com
 
 ## Añadir una nueva etapa
 
-Copia `etapa1.html` y modifica únicamente el bloque `CONFIG_ETAPA` del `<script>`: número de etapa, tema académico, sector, contexto macroeconómico, evento detonante, dilemas y lecciones de victoria.
+El motor `juego.html` contiene la base curricular completa `TEMAS_EMBA` (100 temas en 5 módulos: Estrategia, Finanzas, Marketing, Operaciones y Capital Humano) y genera los dilemas dinámicamente; no hace falta un archivo por etapa. Para el archivo `etapa1.html` clásico, copia y modifica únicamente su bloque `CONFIG_ETAPA`.
