@@ -5,6 +5,112 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>EMBA Game — Motor de Decisiones Estratégicas</title>
 <style>
+  .objetivo-bar {
+    width: 100%;
+    max-width: 960px;
+    margin: 10px auto 0;
+    padding: 10px 16px;
+    background: rgba(0,242,254,.06);
+    border: 1px solid rgba(0,242,254,.35);
+    border-radius: 10px;
+    font-size: .85rem;
+    color: #e2e8f0;
+    line-height: 1.5;
+  }
+  .objetivo-bar b { color: #00f2fe; }
+  .kpi .proj { font-size: .68rem; color: #94a3b8; margin-top: 4px; min-height: 1em; }
+  .kpi .proj.up { color: #22c55e; }
+  .kpi .proj.down { color: #ef4444; }
+  .overlay-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(4,8,20,.82);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    z-index: 60;
+  }
+  .overlay {
+    background: #161f38;
+    border: 1px solid #00f2fe;
+    border-radius: 16px;
+    max-width: 640px;
+    width: 100%;
+    padding: 30px;
+    box-shadow: 0 0 40px rgba(0,242,254,.22);
+    max-height: 90vh;
+    overflow-y: auto;
+  }
+  .overlay h2 { color: #00f2fe; margin-bottom: 14px; letter-spacing: .5px; font-size: 1.35rem; text-align: center; }
+  .overlay p, .modal p { line-height: 1.65; font-size: .92rem; margin-bottom: 12px; }
+  .overlay ul { margin: 0 0 14px 18px; line-height: 1.7; font-size: .9rem; color: #cbd5e1; }
+  .overlay .api-box {
+    background: #0f1730;
+    border: 1px solid #2b3a63;
+    border-radius: 12px;
+    padding: 16px;
+    margin: 14px 0;
+  }
+  .overlay .api-box label { display: block; font-size: .8rem; color: #94a3b8; margin-bottom: 8px; }
+  .overlay input[type=password] {
+    width: 100%;
+    background: #0a0f1d;
+    border: 1px solid #2b3a63;
+    border-radius: 8px;
+    padding: 12px 14px;
+    color: #e2e8f0;
+    font-size: .9rem;
+    font-family: inherit;
+  }
+  .overlay input:focus { outline: none; border-color: #00f2fe; }
+  .btn-ghost { background: transparent !important; color: #00f2fe !important; border: 1px solid #00f2fe !important; }
+  .btn-ghost:hover { background: rgba(0,242,254,.08) !important; }
+  .btn-row { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; margin-top: 22px; }
+  .slider-box { background: #0f1730; border: 1px solid #2b3a63; border-radius: 12px; padding: 22px; }
+  .slider-labels { display: flex; justify-content: space-between; font-size: .82rem; color: #94a3b8; margin-bottom: 10px; gap: 10px; }
+  .slider-labels b { color: #00f2fe; }
+  input[type=range] {
+    width: 100%;
+    -webkit-appearance: none;
+    appearance: none;
+    height: 6px;
+    border-radius: 3px;
+    background: linear-gradient(90deg, #00f2fe, #2b3a63);
+    outline: none;
+    cursor: pointer;
+  }
+  input[type=range]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 22px; height: 22px;
+    border-radius: 50%;
+    background: #00f2fe;
+    border: 3px solid #0a0f1d;
+    box-shadow: 0 0 10px rgba(0,242,254,.6);
+  }
+  input[type=range]::-moz-range-thumb {
+    width: 22px; height: 22px; border-radius: 50%;
+    background: #00f2fe; border: 3px solid #0a0f1d;
+  }
+  .slider-readout { text-align: center; margin: 14px 0 4px; font-size: .9rem; color: #e2e8f0; }
+  .slider-readout b { color: #00f2fe; font-size: 1.15rem; }
+  .teoria-list { list-style: none; margin: 16px 0; }
+  .teoria-list li { padding: 12px 0 12px 30px; position: relative; line-height: 1.65; font-size: .95rem; border-bottom: 1px solid #232f52; }
+  .teoria-list li::before { content: '◆'; position: absolute; left: 4px; color: #00f2fe; }
+  .debrief-item { background: #0f1730; border: 1px solid #2b3a63; border-left: 3px solid #00f2fe; border-radius: 12px; padding: 18px 20px; margin-bottom: 14px; }
+  .debrief-item h4 { color: #00f2fe; font-size: .9rem; margin-bottom: 8px; line-height: 1.5; }
+  .debrief-item .debrief-concept { font-size: .85rem; color: #94a3b8; margin-bottom: 6px; }
+  .debrief-item p { font-size: .9rem; line-height: 1.6; }
+  .loading-text { text-align: center; color: #00f2fe; padding: 40px 0; font-size: 1rem; letter-spacing: 1px; }
+  .spin {
+    display: inline-block; width: 26px; height: 26px; margin-right: 10px; vertical-align: middle;
+    border: 3px solid rgba(0,242,254,.25); border-top-color: #00f2fe; border-radius: 50%;
+    animation: spin 1s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+</style>
+<style>
   * { margin: 0; padding: 0; box-sizing: border-box; }
   body {
     background: #0a0f1d;
@@ -165,37 +271,87 @@
 </head>
 <body>
 
-<div class="header">
+<div class="overlay-backdrop" id="welcome-overlay">
+  <div class="overlay">
+    <h2>🎓 Bienvenido al EMBA Game</h2>
+    <p>Estás a punto de entrar en un <b>simulador de decisiones ejecutivas</b> inspirado en el método del caso de las mejores escuelas de negocio. Aquí no lees teoría: la <b>diriges</b>.</p>
+    <ul>
+      <li><b>Qué es:</b> un plan de estudios EMBA de 100 etapas convertidas en niveles de juego, organizadas en 5 módulos: Estrategia, Finanzas, Marketing, Operaciones y Capital Humano.</li>
+      <li><b>Para qué sirve:</b> entrenar tu criterio directivo. En cada etapa leerás un briefing con la teoría del tema, afrontarás 3 dilemas gestionando KPIs reales (💰 Finanzas, ⚙️ Operaciones, 👥 Talento, 📈 Mercado) y recibirás un informe final que conecta cada decisión con el marco académico que estabas aplicando.</li>
+      <li><b>Cómo se juega:</b> partes del 50% en cada KPI. Toma decisiones (elige opciones o mueve variables de asignación según el dilema) y sobrevive: si un KPI cae a 0%, quedas <b>destituido</b>. Si superas los 3 dilemas, la etapa queda registrada en tu expediente.</li>
+      <li><b>Tu avance</b> se guarda automáticamente y puedes descargarlo como archivo <code>.json</code> o sincronizarlo en la nube.</li>
+    </ul>
+    <div class="api-box">
+      <label for="api-key-input">🔑 Clave API de Mistral (opcional) — genera cada etapa con IA: teoría, dilemas y escenarios frescos en cada partida. Se guarda solo en este navegador. Si no la introduces, el motor usará su generador interno.</label>
+      <input type="password" id="api-key-input" placeholder="sk-… (déjalo vacío para usar el generador interno)">
+    </div>
+    <div class="btn-row">
+      <button class="btn-main" id="btn-start">Comenzar mi etapa</button>
+    </div>
+    <div class="status-line" id="welcome-status"></div>
+  </div>
+</div>
+
+<div class="header" id="app-header" style="display:none;">
   <h1 id="stage-title">Cargando escenario ejecutivo…</h1>
   <div class="modulo" id="stage-modulo"></div>
   <div class="stage-meta" id="stage-meta"></div>
 </div>
 
-<div class="kpis">
+<div class="objetivo-bar" id="objetivo-bar" style="display:none;"></div>
+
+<div class="kpis" id="kpis-panel" style="display:none;">
   <div class="kpi" id="kpi-finanzas">
     <div class="label">💰 Finanzas</div>
     <div class="value" id="val-finanzas">50%</div>
+    <div class="proj" id="proj-finanzas"></div>
   </div>
   <div class="kpi" id="kpi-operaciones">
     <div class="label">⚙️ Operaciones</div>
     <div class="value" id="val-operaciones">50%</div>
+    <div class="proj" id="proj-operaciones"></div>
   </div>
   <div class="kpi" id="kpi-talento">
     <div class="label">👥 Capital Humano</div>
     <div class="value" id="val-talento">50%</div>
+    <div class="proj" id="proj-talento"></div>
   </div>
   <div class="kpi" id="kpi-mercado">
     <div class="label">📈 Mercado y Reputación</div>
     <div class="value" id="val-mercado">50%</div>
+    <div class="proj" id="proj-mercado"></div>
   </div>
 </div>
 
 <div class="screen">
+  <div id="screen-loading" style="display:none;"><div class="card"><p class="loading-text"><span class="spin"></span><span id="loading-msg">Generando escenario ejecutivo…</span></p></div></div>
+
+  <div id="screen-teoria" style="display:none;">
+    <div class="card">
+      <span class="dilemma-tag">📖 Briefing académico previo</span>
+      <h3 style="color:#00f2fe; margin-bottom:6px;" id="teoria-tema"></h3>
+      <p class="narrative" id="teoria-intro" style="margin-bottom:10px;"></p>
+      <ul class="teoria-list" id="teoria-list"></ul>
+      <div class="btn-row"><button class="btn-main" id="btn-go-dilemmas">He entendido la teoría — afrontar los dilemas</button></div>
+    </div>
+  </div>
+
   <div id="screen-game">
     <div class="card" id="dilemma-card">
       <span class="dilemma-tag" id="dilemma-tag">Dilema 1 de 3</span>
       <p class="narrative" id="dilemma-narrative"></p>
       <div class="options" id="options-container"></div>
+      <div id="slider-container" style="display:none;"></div>
+    </div>
+  </div>
+
+  <div id="screen-debrief" style="display:none;">
+    <div class="card">
+      <span class="dilemma-tag">🧠 Informe de aprendizaje</span>
+      <h3 style="color:#00f2fe; margin-bottom:4px;">La teoría detrás de tus decisiones</h3>
+      <p class="narrative" style="margin-bottom:16px;">Antes de ver el desenlace, revisa qué marco académico se escondía detrás de cada dilema y cómo se aplicaba a tu decisión. Así es como las escuelas de negocio cierran un caso: la decisión importa, pero el patrón que enseña es lo que queda.</p>
+      <div id="debrief-list"></div>
+      <div class="btn-row"><button class="btn-main" id="btn-go-result">Ver desenlace ejecutivo</button></div>
     </div>
   </div>
 
@@ -205,8 +361,11 @@
       <p class="narrative" id="result-message"></p>
       <div class="final-kpis" id="final-kpis"></div>
       <ul class="lessons" id="result-lessons"></ul>
-      <button class="btn-main btn-retry" id="btn-retry">Reintentar Desafío Ejecutivo</button>
-      <button class="btn-main" id="btn-return">Regresar al Mapa de Ruta</button>
+      <div class="btn-row">
+        <button class="btn-main btn-retry" id="btn-retry">Reintentar Desafío Ejecutivo</button>
+        <button class="btn-main" id="btn-return">Regresar al Mapa de Ruta</button>
+        <button class="btn-main btn-ghost" id="btn-export">⬇ Exportar avance (.json)</button>
+      </div>
       <div class="status-line" id="sync-status"></div>
     </div>
   </div>
@@ -356,11 +515,76 @@ const KPI_LABELS_CORTOS = {
   finanzas: 'Finanzas', operaciones: 'Operaciones', talento: 'Capital Humano', mercado: 'Mercado'
 };
 
+const TEORIA_MODULO = {
+  'Estrategia': {
+    intro: 'El módulo de Estrategia responde a la pregunta decisiva de cualquier empresa: ¿dónde competimos y cómo ganamos de forma sostenible?',
+    puntos: [
+      'La ventaja competitiva nace de elegir una posición distinta, no de hacer lo mismo que los rivales un poco mejor.',
+      'Toda estrategia real implica trade-offs: renunciar a algo para ser insuperable en otra cosa.',
+      'El entorno (competidores, regulación, tecnología) define los límites del juego; la estrategia define cómo juegas dentro de ellos.',
+      'Crecer y transformar sin destruir la organización es tan estratégico como elegir el mercado.'
+    ]
+  },
+  'Finanzas': {
+    intro: 'El módulo de Finanzas convierte cada decisión de negocio en su impacto sobre caja, rentabilidad y riesgo.',
+    puntos: [
+      'La caja es oxígeno: una empresa rentable puede quebrar por falta de liquidez, y una en pérdidas puede sobrevivir con caja.',
+      'El coste de capital (WACC) es la vara con la que se mide si un proyecto crea o destruye valor.',
+      'El apalancamiento multiplica resultados en ambas direcciones: acelera el crecimiento y agrava la caída.',
+      'Los sesgos conductuales (exceso de confianza, aversión a la pérdida) distorsionan decisiones incluso con buenos números delante.'
+    ]
+  },
+  'Marketing': {
+    intro: 'El módulo de Marketing conecta la estrategia con el cliente: quién es, qué valora y por qué te elige a ti.',
+    puntos: [
+      'No existe "el cliente": existe un segmento concreto con una necesidad y una disposición a pagar concretas.',
+      'El valor percibido, no el coste, fija el techo del precio; el coste fija el suelo de la supervivencia.',
+      'Adquirir clientes (CAC) solo tiene sentido si su valor a lo largo de la vida (CLV) lo supera con holgura.',
+      'La marca es un activo que reduce el coste de la elección: menos fricción, más fidelidad, más margen.'
+    ]
+  },
+  'Operaciones': {
+    intro: 'El módulo de Operaciones trata de ejecutar de forma impecable: la estrategia sin ejecución es solo una intención.',
+    puntos: [
+      'Todo sistema tiene un cuello de botella: optimizar cualquier otra cosa no acelera el proceso completo.',
+      'El desperdicio (Muda) es todo lo que consume recursos sin crear valor para el cliente.',
+      'La eficiencia y la resiliencia compiten: las cadenas mínimamente optimizadas se rompen con el primer golpe externo.',
+      'La tecnología (IA, IoT, automatización) solo genera ventaja cuando rediseña el proceso, no cuando se superpone al caos existente.'
+    ]
+  },
+  'Capital Humano': {
+    intro: 'El módulo de Capital Humano reconoce que las organizaciones no ejecutan estrategias: las ejecutan las personas.',
+    puntos: [
+      'La cultura es lo que ocurre cuando nadie mira: es la ventaja competitiva más difícil de copiar.',
+      'El talento clave no se retiene solo con dinero, sino con propósito, desarrollo y coherencia entre lo que se dice y se hace.',
+      'Los sistemas de incentivos enseñan más que los discursos: se obtiene lo que se premia, no lo que se pide.',
+      'El liderazgo en crisis es gestión del significado: dar dirección y calma cuando la incertidumbre es máxima.'
+    ]
+  }
+};
+
 let escenario = null;
 let kpis = { finanzas: 50, operaciones: 50, talento: 50, mercado: 50 };
 let dilemmaIndex = 0;
 let gameOver = false;
 let victoria = false;
+let historial = [];
+
+/* ============================================================
+   VENTANA DE BIENVENIDA Y CLAVE API MISTRAL
+   ============================================================ */
+document.getElementById('api-key-input').value = localStorage.getItem('emba_mistral_api_key') || '';
+
+document.getElementById('btn-start').addEventListener('click', async () => {
+  const key = document.getElementById('api-key-input').value.trim();
+  if (key) localStorage.setItem('emba_mistral_api_key', key);
+  else localStorage.removeItem('emba_mistral_api_key');
+  document.getElementById('welcome-overlay').style.display = 'none';
+  document.getElementById('app-header').style.display = 'block';
+  document.getElementById('objetivo-bar').style.display = 'block';
+  document.getElementById('kpis-panel').style.display = 'grid';
+  await cargarEtapa(detectarEtapa());
+});
 
 /* ============================================================
    DETECCIÓN AUTOMÁTICA DE NIVEL
@@ -386,12 +610,93 @@ function detectarEtapa() {
    ============================================================ */
 function rnd(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
 function signo(n) { return n >= 0 ? '+' + n : String(n); }
+function clampI(n) { return Math.max(-25, Math.min(25, Math.round(Number(n) || 0))); }
 
-function generarEscenario(etapa) {
+async function cargarEtapa(etapa) {
+  document.getElementById('screen-teoria').style.display = 'none';
+  document.getElementById('screen-game').style.display = 'none';
+  document.getElementById('screen-debrief').style.display = 'none';
+  document.getElementById('screen-result').style.display = 'none';
+  document.getElementById('screen-loading').style.display = 'block';
+  const key = localStorage.getItem('emba_mistral_api_key');
+  let esc = null;
+  if (key) {
+    document.getElementById('loading-msg').textContent = 'Generando etapa con IA (Mistral)…';
+    try { esc = await generarEscenarioIA(etapa, key); } catch (e) { esc = null; }
+  }
+  if (!esc) {
+    document.getElementById('loading-msg').textContent = 'Generando escenario ejecutivo…';
+    await new Promise(r => setTimeout(r, 400));
+    esc = generarEscenarioLocal(etapa);
+  }
+  escenario = esc;
+  kpis = { finanzas: 50, operaciones: 50, talento: 50, mercado: 50 };
+  dilemmaIndex = 0;
+  gameOver = false;
+  victoria = false;
+  historial = [];
+  document.getElementById('screen-loading').style.display = 'none';
+  renderCabecera();
+  renderKPIs();
+  mostrarTeoria();
+}
+
+async function generarEscenarioIA(etapa, apiKey) {
   const tema = TEMAS_EMBA[etapa];
   const sector = rnd(SECTORES);
   const contexto = rnd(CONTEXTOS);
   const evento = rnd(EVENTOS);
+  const prompt = 'Eres un diseñador instruccional de una escuela de negocios top (estilo Harvard/INSEAD) y guionista de simuladores ejecutivos. Genera UN nivel de un juego de decisiones estratégicas en JSON estricto (sin markdown), en español, con esta estructura exacta:\n' +
+    '{"teoria": {"intro": "1-2 frases que conecten el tema con la práctica directiva", "puntos": ["4-5 conceptos clave del tema, didácticos y concretos"]}, "objetivo": "1 frase con el objetivo de negocio del nivel, concreto y medible", "dilemas": [ para 2 de los 3 dilemas: {"tipo": "eleccion", "narrativa": "3 frases de mini-historia", "concepto": "marco o teoría concreta que se pone a prueba", "opciones": [{"texto": "decisión ejecutiva", "feedback": "por qué académico y de negocio de las consecuencias, 3-4 frases", "impactos": {"finanzas": -20..20, "operaciones": -20..20, "talento": -20..20, "mercado": -20..20}}, {"texto": "decisión ejecutiva alternativa", "feedback": "...", "impactos": {...}}]} ; para exactamente 1 dilema: {"tipo": "slider", "narrativa": "3 frases: hay que repartir un presupuesto entre dos palancas", "concepto": "marco teórico que se pone a prueba", "etiquetaA": "palanca defensiva", "etiquetaB": "palanca ofensiva", "efectosA": {"finanzas": -20..20, "operaciones": -20..20, "talento": -20..20, "mercado": -20..20}, "efectosB": {...}, "posicionOptima": 0-100, "feedbackOptimo": "cómo se aplica la teoría al equilibrio entre ambas palancas, 3 frases", "feedbackExtremoA": "riesgo de inclinar demasiado a A", "feedbackExtremoB": "riesgo de inclinar demasiado a B"} ]}\n' +
+    'Tema académico obligatorio: "' + tema.tema + '" (módulo: ' + tema.modulo + '). Sector: ' + sector.nombre + ', empresa llamada ' + sector.empresa + '. Contexto macro: ' + contexto + '. Evento detonante: ' + evento + '. Los impactos deben reflejar trade-offs realistas (ninguna opción domina en los 4 KPIs). Devuelve solo el JSON.';
+  const resp = await fetch('https://api.mistral.ai/v1/chat/completions', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + apiKey },
+    body: JSON.stringify({
+      model: 'mistral-small-latest',
+      temperature: 0.8,
+      response_format: { type: 'json_object' },
+      messages: [{ role: 'user', content: prompt }]
+    })
+  });
+  if (!resp.ok) throw new Error('API error ' + resp.status);
+  const data = await resp.json();
+  const contenido = JSON.parse(data.choices[0].message.content);
+  const dilemas = [];
+  (contenido.dilemas || []).forEach(d => {
+    if (d.tipo === 'slider' && d.efectosA && d.efectosB) {
+      dilemas.push({
+        tipo: 'slider',
+        narrativa: d.narrativa || '',
+        concepto: d.concepto || tema.tema,
+        etiquetaA: d.etiquetaA || 'Palanca A',
+        etiquetaB: d.etiquetaB || 'Palanca B',
+        efectosA: { finanzas: clampI(d.efectosA.finanzas), operaciones: clampI(d.efectosA.operaciones), talento: clampI(d.efectosA.talento), mercado: clampI(d.efectosA.mercado) },
+        efectosB: { finanzas: clampI(d.efectosB.finanzas), operaciones: clampI(d.efectosB.operaciones), talento: clampI(d.efectosB.talento), mercado: clampI(d.efectosB.mercado) },
+        posicionOptima: Math.max(0, Math.min(100, Math.round(d.posicionOptima || 50))),
+        feedbackOptimo: d.feedbackOptimo || '',
+        feedbackExtremoA: d.feedbackExtremoA || '',
+        feedbackExtremoB: d.feedbackExtremoB || ''
+      });
+    } else if (Array.isArray(d.opciones) && d.opciones.length >= 2) {
+      dilemas.push({
+        tipo: 'eleccion',
+        narrativa: d.narrativa || '',
+        concepto: d.concepto || tema.tema,
+        opciones: d.opciones.slice(0, 2).map(o => ({
+          texto: o.texto || '',
+          feedback: o.feedback || '',
+          impactos: {
+            finanzas: clampI(o.impactos && o.impactos.finanzas),
+            operaciones: clampI(o.impactos && o.impactos.operaciones),
+            talento: clampI(o.impactos && o.impactos.talento),
+            mercado: clampI(o.impactos && o.impactos.mercado)
+          }
+        }))
+      });
+    }
+  });
+  if (dilemas.length !== 3 || !dilemas.some(x => x.tipo === 'slider')) throw new Error('Esquema invalido');
   return {
     etapa: etapa,
     modulo: tema.modulo,
@@ -400,6 +705,33 @@ function generarEscenario(etapa) {
     empresa: sector.empresa,
     contexto: contexto,
     evento: evento,
+    origen: 'IA (Mistral)',
+    objetivo: contenido.objetivo || ('Superar los 3 dilemas manteniendo los 4 KPIs por encima del 0%, aplicando "' + tema.tema + '" en ' + sector.nombre + '.'),
+    teoria: {
+      intro: (contenido.teoria && contenido.teoria.intro) || TEORIA_MODULO[tema.modulo].intro,
+      puntos: (contenido.teoria && Array.isArray(contenido.teoria.puntos) && contenido.teoria.puntos.length ? contenido.teoria.puntos : TEORIA_MODULO[tema.modulo].puntos)
+    },
+    dilemas: dilemas
+  };
+}
+
+function generarEscenarioLocal(etapa) {
+  const tema = TEMAS_EMBA[etapa];
+  const sector = rnd(SECTORES);
+  const contexto = rnd(CONTEXTOS);
+  const evento = rnd(EVENTOS);
+  const teoriaMod = TEORIA_MODULO[tema.modulo];
+  return {
+    etapa: etapa,
+    modulo: tema.modulo,
+    tema: tema.tema,
+    sector: sector.nombre,
+    empresa: sector.empresa,
+    contexto: contexto,
+    evento: evento,
+    origen: 'Generador interno',
+    objetivo: 'Superar los 3 dilemas manteniendo los 4 KPIs por encima del 0%, aplicando "' + tema.tema + '" en ' + sector.nombre + ' frente a ' + contexto.toLowerCase() + '.',
+    teoria: { intro: teoriaMod.intro, puntos: teoriaMod.puntos.slice() },
     dilemas: construirDilemas(tema, sector, contexto, evento)
   };
 }
@@ -407,6 +739,8 @@ function generarEscenario(etapa) {
 function construirDilemas(tema, sector, contexto, evento) {
   return [
     {
+      tipo: 'eleccion',
+      concepto: tema.tema + ' — diagnóstico y priorización bajo incertidumbre',
       narrativa: 'Diriges ' + sector.empresa + ', empresa de referencia en ' + sector.nombre +
         '. El entorno macro cambió: ' + contexto.toLowerCase() + '. De repente, ' + evento +
         '. Tu comité ejecutivo exige una respuesta inmediata y la ventana de decisión es de 48 horas. La cuestión de fondo es cómo aplicar los principios de "' + tema.tema + '" sin comprometer la continuidad del negocio.',
@@ -424,23 +758,23 @@ function construirDilemas(tema, sector, contexto, evento) {
       ]
     },
     {
+      tipo: 'slider',
+      concepto: tema.tema + ' — asignación de recursos y trade-offs entre defensa y ataque',
       narrativa: 'Semana 3. En plena fase de ' + contexto.toLowerCase() + ', el efecto de "' + evento +
-        '" se agrava: dos directivos clave proponen decisiones opuestas. Uno defiende proteger el statu quo y esperar a que el entorno se estabilice; el otro pide transformar ahora el modelo aplicando "' + tema.tema +
-        '" con inversión intensiva, aunque suponga un periodo de dolor operativo y ajustes en la plantilla.',
-      opciones: [
-        {
-          texto: 'Mantener el statu quo: no arriesgar lo construido, esperar a que el entorno de ' + contexto.toLowerCase() + ' se estabilice antes de mover ficha.',
-          feedback: 'La parálisis ante shocks externos es una decisión en sí misma, y rara vez es la correcta. El competidor o el regulador no esperan: mientras conservas caja a corto plazo (puntual alivio en Finanzas), pierdes posicionamiento frente al mercado, tu mejor talento busca empresas con visión y la organización percibe falta de dirección. "' + tema.tema + '" exige anticipar, no observar.',
-          impactos: { finanzas: +6, operaciones: -6, talento: -14, mercado: -14 }
-        },
-        {
-          texto: 'Transformar ahora: aprobar la inversión y el plan de ajuste, con comunicación transparente, hitos medibles y protección explícita de los equipos críticos del modelo de ' + sector.nombre + '.',
-          feedback: 'Decisión valiente y alineada con "' + tema.tema + '": el momento de transformar es cuando aún tienes recursos, no cuando el mercado te obliga. La inversión puntual pesa en Finanzas y la ejecución exige mucho de Operaciones, pero la combinación de transparencia, hitos claros y protección del talento clave convierte el cambio en ventaja competitiva ante ' + contexto.toLowerCase() + '.',
-          impactos: { finanzas: -10, operaciones: +8, talento: +6, mercado: +14 }
-        }
-      ]
+        '" obliga a activar un presupuesto extraordinario de 10 millones. El comité está dividido: una parte pide blindar el núcleo del negocio; la otra, acelerar la transformación basada en "' + tema.tema +
+        '". Tú decides cómo se reparte cada euro entre las dos palancas. Mueve el control y observa en vivo cómo reaccionarían tus KPIs antes de confirmar.',
+      etiquetaA: 'Blindar el núcleo operativo y comercial',
+      etiquetaB: 'Acelerar la transformación estratégica',
+      efectosA: { finanzas: +6, operaciones: +12, talento: +8, mercado: -6 },
+      efectosB: { finanzas: -12, operaciones: -4, talento: -4, mercado: +16 },
+      posicionOptima: 60,
+      feedbackOptimo: 'El punto didáctico de "' + tema.tema + '" es que los recursos escasos exigen equilibrio: blindar en exceso te hace irrelevante mañana y transformar en exceso te deja sin caja hoy. Alrededor del 60/40 proteges la máquina que genera caja mientras construyes la posición futura.',
+      feedbackExtremoA: 'Con casi todo el presupuesto en blindar, la caja y las operaciones respiran, pero el mercado percibe una empresa a la defensiva justo cuando "' + tema.tema + '" exige moverse primero. ',
+      feedbackExtremoB: 'Con casi todo en transformar, la narrativa es ambiciosa pero la caja se drena y el negocio núcleo queda desprotegido en medio de ' + contexto.toLowerCase() + '. '
     },
     {
+      tipo: 'eleccion',
+      concepto: tema.tema + ' — consolidación de ventaja frente a crecimiento cosmético',
       narrativa: 'Final del trimestre. La tormenta de "' + evento + '" ha dejado la industria de ' + sector.nombre +
         ' reordenada: varios competidores han desaparecido y queda espacio para capturar cuota. Sin embargo, tu CFO advierte que la caja apenas da para una sola gran apuesta en medio de ' + contexto.toLowerCase() +
         '. La junta directiva te pide elegir el movimiento final que defina tu legado en torno a "' + tema.tema + '".',
@@ -463,73 +797,203 @@ function construirDilemas(tema, sector, contexto, evento) {
 /* ============================================================
    RENDER
    ============================================================ */
-function renderKPIs() {
+function renderKPIs(proyeccion) {
   KPI_KEYS.forEach(k => {
     const v = Math.round(kpis[k]);
     document.getElementById('val-' + k).textContent = v + '%';
     document.getElementById('kpi-' + k).classList.toggle('low', v <= 20);
+    const proj = document.getElementById('proj-' + k);
+    if (proyeccion) {
+      const p = Math.min(100, Math.max(0, kpis[k] + proyeccion[k]));
+      const d = Math.round(p - kpis[k]);
+      proj.textContent = '→ ' + Math.round(p) + '% (' + signo(d) + ')';
+      proj.className = 'proj ' + (d > 0 ? 'up' : d < 0 ? 'down' : '');
+    } else {
+      proj.textContent = '';
+    }
   });
 }
 
 function renderCabecera() {
   document.getElementById('stage-title').textContent = 'Etapa ' + escenario.etapa + ' de 100 — ' + escenario.tema;
-  document.getElementById('stage-modulo').textContent = 'Módulo: ' + escenario.modulo;
+  document.getElementById('stage-modulo').textContent = 'Módulo: ' + escenario.modulo + ' · Escenario: ' + escenario.origen;
   document.getElementById('stage-meta').innerHTML =
     'Sector: ' + escenario.sector + ' (' + escenario.empresa + ') · Contexto: ' + escenario.contexto;
+  document.getElementById('objetivo-bar').innerHTML = '<b>🎯 Objetivo de la etapa:</b> ' + escenario.objetivo;
 }
+
+function mostrarTeoria() {
+  document.getElementById('teoria-tema').textContent = escenario.tema;
+  document.getElementById('teoria-intro').textContent = escenario.teoria.intro;
+  const list = document.getElementById('teoria-list');
+  list.innerHTML = '';
+  escenario.teoria.puntos.forEach(p => {
+    const li = document.createElement('li');
+    li.textContent = p;
+    list.appendChild(li);
+  });
+  document.getElementById('screen-teoria').style.display = 'block';
+}
+
+document.getElementById('btn-go-dilemmas').addEventListener('click', () => {
+  document.getElementById('screen-teoria').style.display = 'none';
+  document.getElementById('screen-game').style.display = 'block';
+  renderDilemma();
+});
 
 function renderDilemma() {
   const d = escenario.dilemas[dilemmaIndex];
   document.getElementById('dilemma-tag').textContent =
-    'Dilema ' + (dilemmaIndex + 1) + ' de ' + escenario.dilemas.length;
+    'Dilema ' + (dilemmaIndex + 1) + ' de ' + escenario.dilemas.length +
+    (d.tipo === 'slider' ? ' · Mecánica: asignación de recursos' : ' · Mecánica: decisión ejecutiva');
   document.getElementById('dilemma-narrative').textContent = d.narrativa;
-  const cont = document.getElementById('options-container');
-  cont.innerHTML = '';
-  d.opciones.forEach((op, i) => {
-    const btn = document.createElement('button');
-    btn.className = 'option';
-    btn.textContent = op.texto;
-    btn.addEventListener('click', () => elegirOpcion(i));
-    cont.appendChild(btn);
+  const opts = document.getElementById('options-container');
+  const slider = document.getElementById('slider-container');
+  opts.innerHTML = '';
+  slider.innerHTML = '';
+  if (d.tipo === 'slider') {
+    opts.style.display = 'none';
+    slider.style.display = 'block';
+    renderSlider(d);
+  } else {
+    opts.style.display = 'flex';
+    slider.style.display = 'none';
+    d.opciones.forEach((op, i) => {
+      const btn = document.createElement('button');
+      btn.className = 'option';
+      btn.textContent = op.texto;
+      btn.addEventListener('click', () => elegirOpcion(i));
+      opts.appendChild(btn);
+    });
+  }
+}
+
+function renderSlider(d) {
+  const cont = document.getElementById('slider-container');
+  cont.innerHTML =
+    '<div class="slider-box">' +
+      '<div class="slider-labels"><span><b>A.</b> ' + d.etiquetaA + '</span><span><b>B.</b> ' + d.etiquetaB + '</span></div>' +
+      '<input type="range" id="alloc-slider" min="0" max="100" value="50" step="5">' +
+      '<div class="slider-readout">Reparto del presupuesto: <b id="alloc-readout-a">50%</b> a la palanca A · <b id="alloc-readout-b">50%</b> a la palanca B</div>' +
+      '<p style="font-size:.78rem; color:#94a3b8; text-align:center; margin:8px 0 16px;">Mueve el control y observa cómo se moverían tus KPIs (flechas bajo cada indicador) antes de confirmar.</p>' +
+      '<div class="btn-row"><button class="btn-main" id="btn-confirm-slider">Confirmar asignación</button></div>' +
+    '</div>';
+  const sliderEl = document.getElementById('alloc-slider');
+  function impactosDe(x) {
+    const imp = {};
+    KPI_KEYS.forEach(k => {
+      imp[k] = Math.round((d.efectosA[k] * x + d.efectosB[k] * (100 - x)) / 100);
+    });
+    return imp;
+  }
+  function actualizar() {
+    const x = parseInt(sliderEl.value, 10);
+    document.getElementById('alloc-readout-a').textContent = x + '%';
+    document.getElementById('alloc-readout-b').textContent = (100 - x) + '%';
+    renderKPIs(impactosDe(x));
+  }
+  sliderEl.addEventListener('input', actualizar);
+  actualizar();
+  document.getElementById('btn-confirm-slider').addEventListener('click', () => {
+    const x = parseInt(sliderEl.value, 10);
+    const imp = impactosDe(x);
+    let feedback;
+    if (Math.abs(x - d.posicionOptima) <= 15) feedback = d.feedbackOptimo;
+    else if (x < d.posicionOptima) feedback = d.feedbackExtremoA + d.feedbackOptimo;
+    else feedback = d.feedbackExtremoB + d.feedbackOptimo;
+    registrarDecision(d, 'Asignaste ' + x + '% a "' + d.etiquetaA + '" y ' + (100 - x) + '% a "' + d.etiquetaB + '"', feedback, imp);
+    aplicarImpactos(imp);
   });
 }
 
 function elegirOpcion(i) {
   if (gameOver) return;
-  const op = escenario.dilemas[dilemmaIndex].opciones[i];
-  KPI_KEYS.forEach(k => { kpis[k] = Math.min(100, Math.max(0, kpis[k] + op.impactos[k])); });
+  const d = escenario.dilemas[dilemmaIndex];
+  const op = d.opciones[i];
+  registrarDecision(d, op.texto, op.feedback, op.impactos);
+  aplicarImpactos(op.impactos);
+}
+
+function registrarDecision(d, eleccion, feedback, impactos) {
+  historial.push({
+    numero: dilemmaIndex + 1,
+    concepto: d.concepto,
+    eleccion: eleccion,
+    feedback: feedback,
+    impactos: impactos
+  });
+}
+
+function aplicarImpactos(impactos) {
+  KPI_KEYS.forEach(k => {
+    kpis[k] = Math.min(100, Math.max(0, kpis[k] + impactos[k]));
+  });
   renderKPIs();
   const impactsDiv = document.getElementById('modal-impacts');
   impactsDiv.innerHTML = '';
   KPI_KEYS.forEach(k => {
-    const delta = op.impactos[k];
+    const delta = impactos[k];
     const chip = document.createElement('span');
     chip.className = 'impact ' + (delta >= 0 ? 'up' : 'down');
     chip.textContent = KPI_LABELS[k] + ': ' + signo(delta);
     impactsDiv.appendChild(chip);
   });
-  document.getElementById('modal-feedback').textContent = op.feedback;
+  document.getElementById('modal-feedback').textContent = historial[historial.length - 1].feedback;
   document.getElementById('modal-backdrop').style.display = 'flex';
 }
+
+/* ============================================================
+   INFORME DIDÁCTICO POST-DILEMAS
+   ============================================================ */
+function mostrarDebrief() {
+  gameOver = true;
+  victoria = KPI_KEYS.every(k => kpis[k] > 0);
+  document.getElementById('screen-game').style.display = 'none';
+  const list = document.getElementById('debrief-list');
+  list.innerHTML = '';
+  historial.forEach(h => {
+    const item = document.createElement('div');
+    item.className = 'debrief-item';
+    item.innerHTML = '<h4>Dilema ' + h.numero + ' — Decidiste: ' + h.eleccion.slice(0, 120) + (h.eleccion.length > 120 ? '…' : '') + '</h4>' +
+      '<div class="debrief-concept">📚 Teoría aplicada: ' + h.concepto + '</div>';
+    const chips = document.createElement('div');
+    chips.className = 'impacts';
+    KPI_KEYS.forEach(k => {
+      const delta = h.impactos[k];
+      const chip = document.createElement('span');
+      chip.className = 'impact ' + (delta >= 0 ? 'up' : 'down');
+      chip.textContent = signo(delta) + ' ' + KPI_LABELS_CORTOS[k];
+      chips.appendChild(chip);
+    });
+    item.appendChild(chips);
+    const p = document.createElement('p');
+    p.textContent = h.feedback;
+    item.appendChild(p);
+    list.appendChild(item);
+  });
+  document.getElementById('screen-debrief').style.display = 'block';
+}
+
+document.getElementById('btn-go-result').addEventListener('click', () => {
+  document.getElementById('screen-debrief').style.display = 'none';
+  mostrarResultado();
+});
 
 document.getElementById('modal-btn').addEventListener('click', () => {
   document.getElementById('modal-backdrop').style.display = 'none';
   if (KPI_KEYS.some(k => kpis[k] <= 0)) {
-    terminarJuego(false);
+    mostrarDebrief();
     return;
   }
   dilemmaIndex++;
   if (dilemmaIndex >= escenario.dilemas.length) {
-    terminarJuego(true);
+    mostrarDebrief();
   } else {
     renderDilemma();
   }
 });
 
-function terminarJuego(gano) {
-  gameOver = true;
-  victoria = gano;
-  document.getElementById('screen-game').style.display = 'none';
+function mostrarResultado() {
   document.getElementById('screen-result').style.display = 'block';
   const title = document.getElementById('result-title');
   const msg = document.getElementById('result-message');
@@ -544,9 +1008,9 @@ function terminarJuego(gano) {
     fk.appendChild(box);
   });
   lessons.innerHTML = '';
-  document.getElementById('btn-retry').style.display = gano ? 'none' : 'block';
-  document.getElementById('btn-return').textContent = gano ? 'Regresar al Mapa de Ruta' : 'Abandonar y volver al Mapa';
-  if (gano) {
+  document.getElementById('btn-retry').style.display = victoria ? 'none' : 'block';
+  document.getElementById('btn-return').textContent = victoria ? 'Regresar al Mapa de Ruta' : 'Abandonar y volver al Mapa';
+  if (victoria) {
     title.textContent = '✅ Etapa ' + escenario.etapa + ' Superada';
     title.className = 'result-title win';
     msg.textContent = 'Has liderado ' + escenario.empresa + ' superando los 3 dilemas de ' + escenario.sector +
@@ -576,39 +1040,53 @@ function terminarJuego(gano) {
 /* ============================================================
    REINTENTO: MISMO TEMA, NUEVO ESCENARIO ALEATORIO
    ============================================================ */
-function iniciarNivel(etapa) {
-  escenario = generarEscenario(etapa);
-  kpis = { finanzas: 50, operaciones: 50, talento: 50, mercado: 50 };
-  dilemmaIndex = 0;
-  gameOver = false;
-  victoria = false;
-  document.getElementById('screen-result').style.display = 'none';
-  document.getElementById('screen-game').style.display = 'block';
-  document.getElementById('sync-status').textContent = '';
-  renderCabecera();
-  renderKPIs();
-  renderDilemma();
+document.getElementById('btn-retry').addEventListener('click', () => {
+  cargarEtapa(escenario.etapa);
+});
+
+/* ============================================================
+   REGISTRO DE AVANCE EN .JSON (LOCAL + DESCARGA + CLOUD)
+   ============================================================ */
+function registrarAvanceLocal() {
+  const etapa = escenario.etapa;
+  let progreso = null;
+  try { progreso = JSON.parse(localStorage.getItem('emba_progreso')); } catch (e) { progreso = null; }
+  if (!progreso || typeof progreso !== 'object') {
+    progreso = { etapas_completadas: [], puntuacion_global: 0 };
+  }
+  if (!Array.isArray(progreso.etapas_completadas)) progreso.etapas_completadas = [];
+  if (!progreso.etapas_completadas.includes(etapa)) {
+    progreso.etapas_completadas.push(etapa);
+    progreso.puntuacion_global = (progreso.puntuacion_global || 0) + 100;
+    progreso.ultima_etapa = etapa;
+    progreso.fecha_actualizacion = new Date().toISOString();
+    localStorage.setItem('emba_progreso', JSON.stringify(progreso));
+  }
+  return progreso;
 }
 
-document.getElementById('btn-retry').addEventListener('click', () => {
-  iniciarNivel(escenario.etapa);
-});
+function exportarAvanceJSON() {
+  let progreso = null;
+  try { progreso = JSON.parse(localStorage.getItem('emba_progreso')); } catch (e) { progreso = null; }
+  if (!progreso) progreso = registrarAvanceLocal();
+  const blob = new Blob([JSON.stringify(progreso, null, 2)], { type: 'application/json' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'emba_avance.json';
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  URL.revokeObjectURL(a.href);
+}
+
+document.getElementById('btn-export').addEventListener('click', exportarAvanceJSON);
 
 /* ============================================================
    PERSISTENCIA LOCAL Y SINCRONIZACIÓN CLOUD (GitHub)
    ============================================================ */
 async function sincronizarProgreso() {
   const status = document.getElementById('sync-status');
-  const progreso = JSON.parse(localStorage.getItem('emba_progreso'));
-  if (progreso) {
-    const etapa = escenario.etapa;
-    if (!progreso.etapas_completadas || !progreso.etapas_completadas.includes(etapa)) {
-      progreso.etapas_completadas = progreso.etapas_completadas || [];
-      progreso.etapas_completadas.push(etapa);
-      progreso.puntuacion_global = (progreso.puntuacion_global || 0) + 100;
-      localStorage.setItem('emba_progreso', JSON.stringify(progreso));
-    }
-  }
+  const progreso = registrarAvanceLocal();
 
   const token = localStorage.getItem('emba_github_token');
   const sha = localStorage.getItem('emba_github_sha');
@@ -643,6 +1121,7 @@ async function sincronizarProgreso() {
   setTimeout(() => { window.location.href = 'index.html'; }, 800);
 }
 
+
 document.getElementById('btn-return').addEventListener('click', async () => {
   if (victoria) {
     await sincronizarProgreso();
@@ -651,8 +1130,6 @@ document.getElementById('btn-return').addEventListener('click', async () => {
     window.location.href = 'index.html';
   }
 });
-
-iniciarNivel(detectarEtapa());
 </script>
 </body>
 </html>
