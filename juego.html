@@ -194,7 +194,7 @@
     <h2>🚀 Nimbus Dynamics — De garaje a multinacional</h2>
     <p>Diriges <b>Nimbus Dynamics</b>, una startup digital nacida en un garaje. Tu misión: convertirla en una multinacional. A lo largo de <b>100 etapas</b> —una por tema del EMBA— vivirás la evolución real de la empresa: cada etapa es un trimestre de tu historia corporativa y <b>tus KPIs se arrastran de una etapa a otra</b>. Las herencias de tus decisiones se acumulan: no hay resets entre niveles.</p>
     <ul>
-      <li><b>Módulos rotativos:</b> Estrategia → Finanzas → Marketing → Operaciones → Capital Humano → y vuelta a empezar. Cada etapa pone a prueba un tema distinto con su briefing teórico.</li>
+      <li><b>Módulos que se mezclan:</b> cada ciclo de 5 etapas rota Estrategia → Finanzas → Marketing → Operaciones, y la quinta es <b>combinada</b>: un tema de Capital Humano entrelazado con un tema que ya viste ese ciclo (la decisión doble reúne ambos módulos). Esta repetición espaciada consolida lo aprendido: los temas no se sustituyen, se mezclan.</li>
       <li><b>Problemas complejos:</b> dilemas con 3-4 opciones neutras, decisiones dobles que combinan dos módulos a la vez, y asignaciones de recursos con barra. Los impactos de la barra están ocultos: te orientan informes de analistas que rara vez coinciden.</li>
       <li><b>🎯 Reglas de supervivencia:</b> mantén los 4 KPIs (💰 Finanzas, ⚙️ Operaciones, 👥 Capital Humano, 📈 Mercado) <b>por encima del 35%</b> en todo momento, y evita que cualquiera pase <b class="regla-roja">3 rondas seguidas por debajo del 40%</b>.</li>
       <li><b>Educativo:</b> antes de cada etapa lees el briefing teórico; al terminar, un informe conecta cada decisión con el marco académico que estabas aplicando.</li>
@@ -479,12 +479,60 @@ let victoria = false;
 let historial = [];
 let estadoInicial = null;
 
-function moduloDeEtapa(n) { return ORDEN_MODULOS[(n - 1) % ORDEN_MODULOS.length]; }
+function esCombinada(n) { return n % 5 === 0; }
+function cicloDeEtapa(n) { return Math.floor((n - 1) / 5); }
+function temasDe(modulo) {
+  return Object.keys(TEMAS_EMBA).filter(k => TEMAS_EMBA[k].modulo === modulo).map(k => TEMAS_EMBA[k]);
+}
+function moduloDeEtapa(n) {
+  if (esCombinada(n)) return 'Capital Humano';
+  return ORDEN_MODULOS[(n - 1) % ORDEN_MODULOS.length];
+}
+const PLAN_PARES = (function () {
+  const pares = {};
+  const rotacion = ['Estrategia', 'Finanzas', 'Marketing', 'Operaciones'];
+  for (let c = 0; c < 20; c++) {
+    const modB = rotacion[c % 4];
+    pares[c] = { modA: 'Capital Humano', idxA: c, modB: modB, idxB: c, etapaOrigen: 5 * c + 1 };
+  }
+  return pares;
+})();
+function parCombinado(n) {
+  const c = cicloDeEtapa(n);
+  const plan = PLAN_PARES[c];
+  return {
+    modA: plan.modA, temaA: temasDe(plan.modA)[plan.idxA],
+    modB: plan.modB, temaB: temasDe(plan.modB)[plan.idxB],
+    etapaOrigen: plan.etapaOrigen
+  };
+}
 function temaDeEtapa(n) {
+  if (esCombinada(n)) {
+    const par = parCombinado(n);
+    return { modulo: par.modA, tema: par.temaA.tema + ' × ' + par.temaB.tema, par: par };
+  }
   const mod = moduloDeEtapa(n);
-  const idx = Math.floor((n - 1) / ORDEN_MODULOS.length);
-  const temas = Object.keys(TEMAS_EMBA).filter(k => TEMAS_EMBA[k].modulo === mod).map(k => TEMAS_EMBA[k]);
-  return temas[idx];
+  return { modulo: mod, tema: temasDe(mod)[cicloDeEtapa(n)].tema, par: null };
+}
+function etiquetaModulos(n) {
+  if (esCombinada(n)) {
+    const p = parCombinado(n);
+    return MODULO_ICONO[p.modA] + ' ' + p.modA + ' 🔗 ' + MODULO_ICONO[p.modB] + ' ' + p.modB;
+  }
+  const m = moduloDeEtapa(n);
+  return MODULO_ICONO[m] + ' ' + m;
+}
+function modulosMostrarDe(n) {
+  if (esCombinada(n)) { const p = parCombinado(n); return [p.modA, p.modB]; }
+  return [moduloDeEtapa(n)];
+}
+function teoriaCombinada(par) {
+  const a = TEORIA_MODULO[par.modA], b = TEORIA_MODULO[par.modB];
+  return {
+    intro: 'Etapa combinada: ' + a.intro + ' Se entrelaza con ' + b.intro.toLowerCase() +
+      ' — específicamente con "' + par.temaB.tema + '", que ya trabajaste en la Etapa ' + par.etapaOrigen + '. Este refuerzo deliberado consolida lo aprendido.',
+    puntos: a.puntos.slice(0, 2).concat(b.puntos.slice(0, 2))
+  };
 }
 function faseDeEtapa(n) { return FASES.find(f => n >= f.desde && n <= f.hasta) || FASES[FASES.length - 1]; }
 
@@ -599,8 +647,10 @@ async function generarEscenarioIA(etapa, apiKey) {
   const fase = faseDeEtapa(etapa);
   const contexto = rnd(CONTEXTOS);
   const evento = rnd(EVENTOS);
-  const subMod1 = ORDEN_MODULOS[etapa % ORDEN_MODULOS.length];
-  const subMod2 = ORDEN_MODULOS[(etapa + 1) % ORDEN_MODULOS.length];
+  const esComb = esCombinada(etapa);
+  const par = esComb ? parCombinado(etapa) : null;
+  const subMod1 = esComb ? par.modA : ORDEN_MODULOS[etapa % ORDEN_MODULOS.length];
+  const subMod2 = esComb ? par.modB : ORDEN_MODULOS[(etapa + 1) % ORDEN_MODULOS.length];
   const kpisTxt = 'Finanzas: ' + Math.round(kpis.finanzas) + '%, Operaciones: ' + Math.round(kpis.operaciones) + '%, Capital Humano: ' + Math.round(kpis.talento) + '%, Mercado: ' + Math.round(kpis.mercado) + '%';
   const prompt = 'Eres diseñador instruccional de una escuela de negocios top (Harvard/INSEAD) y guionista de simuladores ejecutivos. Genera UN trimestre del simulador en JSON estricto (sin markdown), en español. Regla de oro: enunciados y opciones NO pueden dar pistas sobre cuál es la mejor decisión; todas deben sonar igual de razonables con trade-offs reales. Estructura exacta:\n' +
     '{"teoria": {"intro": "1-2 frases conectando el tema con la práctica directiva", "puntos": ["4-5 conceptos clave del tema, didácticos"]},\n' +
@@ -609,7 +659,9 @@ async function generarEscenarioIA(etapa, apiKey) {
     ' {"tipo": "slider", "narrativa": "3 frases: reparto de un fondo entre dos palancas", "concepto": "marco", "etiquetaA": "palanca A", "etiquetaB": "palanca B", "efectosA": {"finanzas": -12..12, "operaciones": -12..12, "talento": -12..12, "mercado": -12..12}, "efectosB": {...}, "posicionOptima": 30-70, "feedbackOptimo": "3 frases", "feedbackExtremoA": "riesgo de exceso hacia A", "feedbackExtremoB": "riesgo de exceso hacia B"},\n' +
     ' {"tipo": "doble", "narrativa": "3 frases: problema complejo que exige dos decisiones simultáneas", "concepto": "marco integrador", "subdecisiones": [2 objetos {"modulo": "' + subMod1 + '" o "' + subMod2 + '", "titulo": "la decisión a tomar", "opciones": [3 objetos: una coherente (neto +4 a +7, sin daños profundos), una intermedia, una trampa (un KPI +7, dos KPIs -8 o peor); textos neutros sin pistas]}]}\n' +
     ']}\n' +
-    'Empresa: ' + EMPRESA + ', ' + fase.nombre + ' (año ' + fase.ano + ', ' + fase.empleados + ' empleados, ' + fase.ingresos + '). Estado actual de KPIs: ' + kpisTxt + '. Tema obligatorio: "' + tema.tema + '" (módulo: ' + modulo + '). Contexto macro: ' + contexto + '. Evento: ' + evento + '. Ninguna opción debe dominar en los 4 KPIs y ningún texto puede delatar cuál es la trampa ni cuál la correcta: solo el razonamiento teórico debe permitir distinguirlas. Devuelve solo el JSON.';
+    'Empresa: ' + EMPRESA + ', ' + fase.nombre + ' (año ' + fase.ano + ', ' + fase.empleados + ' empleados, ' + fase.ingresos + '). Estado actual de KPIs: ' + kpisTxt + '. Tema obligatorio: "' + tema.tema + '" (módulo: ' + modulo + '). Contexto macro: ' + contexto + '. Evento: ' + evento + '. Ninguna opción debe dominar en los 4 KPIs y ningún texto puede delatar cuál es la trampa ni cuál la correcta: solo el razonamiento teórico debe permitir distinguirlas.' +
+    (esComb ? ' ATENCIÓN: esta es una ETAPA COMBINADA "' + par.modA + ' + ' + par.modB + '": el dilema de elección debe entrelazar ambos temas y el dilema doble debe usar exactamente los módulos "' + par.modA + '" y "' + par.modB + '".' : '') +
+    ' Devuelve solo el JSON.';
   const resp = await fetch('https://api.mistral.ai/v1/chat/completions', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + apiKey },
@@ -660,9 +712,11 @@ async function generarEscenarioIA(etapa, apiKey) {
   return {
     etapa: etapa, modulo: modulo, tema: tema.tema, fase: fase, contexto: contexto, evento: evento,
     origen: 'IA (Mistral)',
+    combinada: esComb,
+    modulosMostrar: modulosMostrarDe(etapa),
     teoria: {
-      intro: (c.teoria && c.teoria.intro) || TEORIA_MODULO[modulo].intro,
-      puntos: (c.teoria && Array.isArray(c.teoria.puntos) && c.teoria.puntos.length ? c.teoria.puntos : TEORIA_MODULO[modulo].puntos)
+      intro: (c.teoria && c.teoria.intro) || (esComb ? teoriaCombinada(par).intro : TEORIA_MODULO[modulo].intro),
+      puntos: (c.teoria && Array.isArray(c.teoria.puntos) && c.teoria.puntos.length ? c.teoria.puntos : (esComb ? teoriaCombinada(par).puntos : TEORIA_MODULO[modulo].puntos))
     },
     dilemas: dilemas
   };
@@ -674,11 +728,18 @@ function generarEscenarioLocal(etapa) {
   const fase = faseDeEtapa(etapa);
   const contexto = rnd(CONTEXTOS);
   const evento = rnd(EVENTOS);
+  const esComb = esCombinada(etapa);
+  const par = esComb ? parCombinado(etapa) : null;
+  const subMods = esComb ? [par.modA, par.modB]
+    : [ORDEN_MODULOS[etapa % ORDEN_MODULOS.length], ORDEN_MODULOS[(etapa + 1) % ORDEN_MODULOS.length]];
+  const teo = esComb ? teoriaCombinada(par) : { intro: TEORIA_MODULO[modulo].intro, puntos: TEORIA_MODULO[modulo].puntos.slice() };
   return {
     etapa: etapa, modulo: modulo, tema: tema.tema, fase: fase, contexto: contexto, evento: evento,
     origen: 'Generador interno',
-    teoria: { intro: TEORIA_MODULO[modulo].intro, puntos: TEORIA_MODULO[modulo].puntos.slice() },
-    dilemas: construirDilemas(etapa, tema, modulo, fase, contexto, evento)
+    combinada: esComb,
+    modulosMostrar: modulosMostrarDe(etapa),
+    teoria: teo,
+    dilemas: construirDilemas(etapa, tema, modulo, fase, contexto, evento, subMods)
   };
 }
 
@@ -733,9 +794,9 @@ const BANCO_SUBDECISIONES = {
   ]
 };
 
-function construirDilemas(etapa, tema, modulo, fase, contexto, evento) {
-  const subMod1 = ORDEN_MODULOS[etapa % ORDEN_MODULOS.length];
-  const subMod2 = ORDEN_MODULOS[(etapa + 1) % ORDEN_MODULOS.length];
+function construirDilemas(etapa, tema, modulo, fase, contexto, evento, subMods) {
+  const subMod1 = subMods[0];
+  const subMod2 = subMods[1];
   const eleccion = {
     tipo: 'eleccion',
     concepto: tema.tema + ' — diagnóstico y primera decisión del trimestre',
@@ -807,7 +868,8 @@ function renderKPIs() {
 function renderCabecera() {
   const f = escenario.fase;
   document.getElementById('stage-title').innerHTML = 'Etapa ' + escenario.etapa + ' · ' +
-    MODULO_ICONO[escenario.modulo] + ' ' + escenario.modulo + ' <span>— ' + escenario.tema + '</span>';
+    etiquetaModulos(escenario.etapa) + (escenario.combinada ? ' <span style="color:#f59e0b;">[ETAPA COMBINADA]</span>' : '') +
+    ' <span>— ' + escenario.tema + '</span>';
   document.getElementById('company-strip').innerHTML =
     '<span class="fase">' + f.nombre + '</span>' +
     '<span>Año <b>' + f.ano + '</b></span>' +
@@ -1153,7 +1215,7 @@ function mostrarResultado() {
     const prox = escenario.etapa < 100 ? escenario.etapa + 1 : null;
     msg.innerHTML = 'Has completado la Etapa ' + escenario.etapa + ' (' + escenario.tema + ') con los cuatro indicadores fuera de zona de riesgo. ' +
       'La empresa se estabiliza entre etapas (los KPIs revierten ligeramente hacia el 50%) y <b>estos valores se heredan en la siguiente etapa</b>.' +
-      (prox ? ' Siguiente: Etapa ' + prox + ' · ' + MODULO_ICONO[moduloDeEtapa(prox)] + ' ' + moduloDeEtapa(prox) + ' — ' + temaDeEtapa(prox).tema : '');
+      (prox ? ' Siguiente: Etapa ' + prox + ' · ' + etiquetaModulos(prox) + ' — ' + temaDeEtapa(prox).tema : '');
     document.getElementById('btn-next').style.display = prox ? 'block' : 'none';
     document.getElementById('btn-retry').style.display = 'none';
     [
