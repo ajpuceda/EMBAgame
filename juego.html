@@ -24,6 +24,25 @@
   }
   .company-strip b { color: #e2e8f0; font-weight: 600; }
   .company-strip .fase { color: #00f2fe; }
+  .api-fab {
+    position: fixed; top: 14px; right: 14px; z-index: 70;
+    background: #161f38; color: #00f2fe; border: 1px solid rgba(0,242,254,.4);
+    border-radius: 10px; padding: 8px 14px; font-size: .78rem; font-weight: 700;
+    cursor: pointer; font-family: inherit; transition: background .2s;
+  }
+  .api-fab:hover { background: #111c3a; }
+  .sector-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); gap: 10px; margin: 12px 0 6px; }
+  .sector-opt {
+    background: #0f1730; border: 1px solid #2b3a63; border-radius: 12px;
+    padding: 14px 12px; text-align: center; cursor: pointer;
+    transition: border-color .2s, transform .15s;
+  }
+  .sector-opt:hover { border-color: #00f2fe; transform: translateY(-2px); }
+  .sector-opt.sel { border-color: #00f2fe; background: #111c3a; box-shadow: 0 0 12px rgba(0,242,254,.2); }
+  .sector-opt .icon { font-size: 1.6rem; }
+  .sector-opt .name { font-size: .82rem; font-weight: 700; color: #e2e8f0; margin-top: 6px; }
+  .sector-opt .desc { font-size: .7rem; color: #94a3b8; margin-top: 4px; line-height: 1.4; }
+  .presion-nota { font-size: .8rem; color: #f59e0b; line-height: 1.55; border-left: 2px solid #f59e0b; padding-left: 10px; margin: 10px 0; }
   .objetivo-bar {
     width: 100%; max-width: 980px; margin: 10px auto 0;
     padding: 10px 16px;
@@ -205,6 +224,24 @@
 </head>
 <body>
 
+<button class="api-fab" id="api-fab" title="Cambiar clave API de Mistral">🔑 API IA</button>
+
+<div class="overlay-backdrop" id="apikey-overlay" style="display:none;">
+  <div class="overlay" style="max-width:480px;">
+    <h2>🔑 Clave API de Mistral</h2>
+    <p>La clave se usa para generar cada trimestre con IA (teoría, dilemas, escenarios) y para el análisis del profesor tras cada decisión. Se guarda solo en este navegador.</p>
+    <div class="api-box">
+      <input type="password" id="api-key-input-2" placeholder="sk-… (vacío = usar generador interno)">
+    </div>
+    <div class="btn-row">
+      <button class="btn-main" id="btn-api-save">Guardar clave</button>
+      <button class="btn-main btn-ghost" id="btn-api-remove">Quitar clave</button>
+      <button class="btn-main btn-ghost" id="btn-api-close">Cerrar</button>
+    </div>
+    <div class="status-line" id="apikey-status"></div>
+  </div>
+</div>
+
 <div class="overlay-backdrop" id="welcome-overlay">
   <div class="overlay">
     <h2>🚀 Nimbus Dynamics — De garaje a multinacional</h2>
@@ -215,6 +252,10 @@
       <li><b>🎯 Reglas de supervivencia:</b> mantén los 4 KPIs (💰 Finanzas, ⚙️ Operaciones, 👥 Capital Humano, 📈 Mercado) <b>por encima del 35%</b> en todo momento, y evita que cualquiera pase <b class="regla-roja">3 rondas seguidas por debajo del 40%</b>.</li>
       <li><b>Educativo:</b> antes de cada etapa lees el briefing teórico; al terminar, un informe conecta cada decisión con el marco académico que estabas aplicando.</li>
     </ul>
+    <div class="api-box" style="margin-top:6px;">
+      <label>🏭 ¿En qué sector nace tu startup? Toda la historia de Nimbus Dynamics —eventos, competidores, dilemas— se contará desde esta industria.</label>
+      <div class="sector-grid" id="sector-grid"></div>
+    </div>
     <div class="api-box">
       <label for="api-key-input">🔑 Clave API de Mistral (opcional) — genera cada etapa con IA: teoría, dilemas y escenarios frescos en cada partida. Se guarda solo en este navegador. Sin clave, el motor usa su generador interno.</label>
       <input type="password" id="api-key-input" placeholder="sk-… (déjalo vacío para usar el generador interno)">
@@ -464,20 +505,40 @@ const TEORIA_MODULO = {
     'El liderazgo en crisis es gestión del significado: dirección y calma ante la incertidumbre.' ] }
 };
 
+const SECTORES_HISTORIA = [
+  { id: 'fintech', icono: '💳', nombre: 'Fintech de Microcréditos', desc: 'Crédito instantáneo por móvil para autónomos',
+    producto: 'la app de microcréditos', cliente: 'autónomos y pequeños comercios', competidor: 'BancoTrad, la app clónica del banco líder', regulador: 'el Banco Central' },
+  { id: 'aeroespacial', icono: '🚀', nombre: 'Aeroespacial', desc: 'Lanzadores ligeros para nano-satélites',
+    producto: 'el lanzador ligero', cliente: 'operadores de constelaciones', competidor: 'OrbitMax, el consorcio estatal', regulador: 'la Agencia Espacial' },
+  { id: 'biotech', icono: '🧬', nombre: 'Biotecnología', desc: 'Terapias personalizadas contra el cáncer',
+    producto: 'la terapia personalizada', cliente: 'hospitales oncológicos', competidor: 'PharmaGiant, la farmacéutica multinacional', regulador: 'la Agencia del Medicamento' },
+  { id: 'logistica', icono: '📦', nombre: 'Logística Automatizada', desc: 'Almacenes robotizados como servicio',
+    producto: 'la red de almacenes robotizados', cliente: 'e-commerce mid-market', competidor: 'CargoNet, el operador logístico incumbente', regulador: 'la Autoridad Fiscalizadora' },
+  { id: 'energia', icono: '⚡', nombre: 'Energías Renovables', desc: 'Baterías de flujo para redes eléctricas',
+    producto: 'la batería de flujo', cliente: 'distribuidoras eléctricas', competidor: 'VoltCorp, el gigante eléctrico', regulador: 'la Comisión Energética' }
+];
+function sectorActivo() {
+  const guardado = localStorage.getItem('emba_sector');
+  return SECTORES_HISTORIA.find(s => s.id === guardado) || SECTORES_HISTORIA[0];
+}
+
 const CONTEXTOS = [
   'Alta inflación con subida de tipos',
   'Recesión inminente',
   'Boom de inversión de capital',
   'Proteccionismo comercial'
 ];
-const EVENTOS = [
-  'un competidor bien financiado lanza un producto equivalente',
-  'el regulador anuncia nueva normativa estricta para el sector',
-  'una filtración de datos salpica a toda la industria',
-  'la cadena de distribución sufre una huelga que retrasa entregas clave',
-  'un cliente mayoritario amenaza con irse si no mejoras las condiciones',
-  'un fondo de inversión ofrece capital fresco con condiciones agresivas'
-];
+function eventosDelSector() {
+  const s = sectorActivo();
+  return [
+    s.competidor + ' lanza una alternativa directamente comparable y la financia con un colchón que no tienes',
+    s.regulador + ' anuncia nueva normativa que recorta márgenes de todo el sector y exige auditorías trimestrales',
+    'una filtración de datos de ' + s.cliente + ' salpica a toda la industria de ' + s.nombre.toLowerCase(),
+    'el principal proveedor logístico de ' + s.producto + ' entra en huelga y retrasa los compromisos clave',
+    'tu mayor cliente (' + s.cliente + ') amenaza con marcharse si no mejoras las condiciones del contrato',
+    'un fondo de inversión ofrece capital fresco a cambio de condiciones de salida agresivas'
+  ];
+}
 
 const KPI_KEYS = ['finanzas', 'operaciones', 'talento', 'mercado'];
 const KPI_LABELS = { finanzas: '💰 Finanzas', operaciones: '⚙️ Operaciones', talento: '👥 Capital Humano', mercado: '📈 Mercado' };
@@ -572,17 +633,52 @@ function guardarEstadoJuego() {
   localStorage.setItem('emba_estado_juego', JSON.stringify({ kpis: kpis, racha: racha }));
 }
 
+const PRESION_FASE = {
+  presionPorEtapa: function (etapa) {
+    const fase = faseDeEtapa(etapa);
+    const c = cicloDeEtapa(etapa);
+    switch (fase.nombre.split(' ')[1]) {
+      case 'Seed': return { kpi: 'finanzas', golpe: 3, nota: 'El garaje quema caja: sin ingresos que lo cubran, cada trimestre de seed cuesta dinero que no vuelve.' };
+      case 'Scale-up': return { kpi: 'operaciones', golpe: 3, nota: 'Crecer más rápido que los procesos pasa factura: la escala destapa cuellos de botella cada trimestre.' };
+      case 'Expansión': return { kpi: 'mercado', golpe: 3, nota: 'Como referencia nacional, cada trimestre te copian un poco más: los competidores ya no te ignoran.' };
+      case 'Internacionalización': return { kpi: 'talento', golpe: 3, nota: 'Tres continentes, tres culturas: la complejidad multicultural erosiona la cohesión del equipo cada trimestre.' };
+      default: return { kpi: 'finanzas', golpe: 4, nota: 'El tamaño pesa: burocracia, comités y costes fijos de multinacional drenan caja cada trimestre.' };
+    }
+  }
+};
+
 function estabilizarEntreEtapas() {
-  KPI_KEYS.forEach(k => {
-    if (kpis[k] < 50) kpis[k] = Math.min(50, kpis[k] + 3);
-    else if (kpis[k] > 50) kpis[k] = Math.max(50, kpis[k] - 3);
-  });
   KPI_KEYS.forEach(k => { if (kpis[k] >= UMBRAL_VIGILANCIA) racha[k] = 0; });
 }
 
 document.getElementById('api-key-input').value = localStorage.getItem('emba_mistral_api_key') || '';
 
+let sectorElegido = localStorage.getItem('emba_sector') || null;
+(function renderSectores() {
+  const grid = document.getElementById('sector-grid');
+  SECTORES_HISTORIA.forEach(s => {
+    const card = document.createElement('div');
+    card.className = 'sector-opt' + (sectorElegido === s.id ? ' sel' : '');
+    card.innerHTML = '<div class="icon">' + s.icono + '</div><div class="name">' + s.nombre + '</div><div class="desc">' + s.desc + '</div>';
+    card.addEventListener('click', () => {
+      sectorElegido = s.id;
+      Array.prototype.forEach.call(grid.children, c => c.classList.remove('sel'));
+      card.classList.add('sel');
+    });
+    grid.appendChild(card);
+  });
+})();
+
 document.getElementById('btn-start').addEventListener('click', async () => {
+  if (!sectorElegido) {
+    document.getElementById('welcome-status').textContent = '🏭 Elige primero el sector en el que nace tu startup.';
+    return;
+  }
+  const cambiarSector = localStorage.getItem('emba_sector') !== sectorElegido;
+  localStorage.setItem('emba_sector', sectorElegido);
+  if (cambiarSector) {
+    localStorage.removeItem('emba_estado_juego');
+  }
   const key = document.getElementById('api-key-input').value.trim();
   if (key) localStorage.setItem('emba_mistral_api_key', key);
   else localStorage.removeItem('emba_mistral_api_key');
@@ -591,6 +687,32 @@ document.getElementById('btn-start').addEventListener('click', async () => {
   document.getElementById('objetivo-bar').style.display = 'block';
   document.getElementById('kpis-panel').style.display = 'grid';
   await cargarEtapa(detectarEtapa());
+});
+
+/* Botón lateral de clave API */
+document.getElementById('api-fab').addEventListener('click', () => {
+  document.getElementById('api-key-input-2').value = localStorage.getItem('emba_mistral_api_key') || '';
+  document.getElementById('apikey-status').textContent = '';
+  document.getElementById('apikey-overlay').style.display = 'flex';
+});
+document.getElementById('btn-api-close').addEventListener('click', () => {
+  document.getElementById('apikey-overlay').style.display = 'none';
+});
+document.getElementById('btn-api-save').addEventListener('click', () => {
+  const key = document.getElementById('api-key-input-2').value.trim();
+  if (key) {
+    localStorage.setItem('emba_mistral_api_key', key);
+    document.getElementById('apikey-status').textContent = '✅ Clave guardada: los próximos trimestres y análisis usarán la IA.';
+  } else {
+    localStorage.removeItem('emba_mistral_api_key');
+    document.getElementById('apikey-status').textContent = '✅ Clave eliminada: se usará el generador interno.';
+  }
+  setTimeout(() => { document.getElementById('apikey-overlay').style.display = 'none'; }, 900);
+});
+document.getElementById('btn-api-remove').addEventListener('click', () => {
+  localStorage.removeItem('emba_mistral_api_key');
+  document.getElementById('apikey-status').textContent = '✅ Clave eliminada: se usará el generador interno.';
+  setTimeout(() => { document.getElementById('apikey-overlay').style.display = 'none'; }, 900);
 });
 
 function detectarEtapa() {
@@ -648,6 +770,9 @@ async function cargarEtapa(etapa) {
     esc = generarEscenarioLocal(etapa);
   }
   escenario = esc;
+  const presion = PRESION_FASE.presionPorEtapa(etapa);
+  escenario.presion = presion;
+  kpis[presion.kpi] = Math.max(0, kpis[presion.kpi] - presion.golpe);
   dilemmaIndex = 0;
   gameOver = false;
   victoria = false;
@@ -663,7 +788,7 @@ async function generarEscenarioIA(etapa, apiKey) {
   const modulo = moduloDeEtapa(etapa);
   const fase = faseDeEtapa(etapa);
   const contexto = rnd(CONTEXTOS);
-  const evento = rnd(EVENTOS);
+  const evento = rnd(eventosDelSector());
   const esComb = esCombinada(etapa);
   const par = esComb ? parCombinado(etapa) : null;
   const subMod1 = esComb ? par.modA : ORDEN_MODULOS[etapa % ORDEN_MODULOS.length];
@@ -676,7 +801,7 @@ async function generarEscenarioIA(etapa, apiKey) {
     ' {"tipo": "slider", "narrativa": "3 frases: reparto de un fondo entre dos palancas", "concepto": "marco", "etiquetaA": "palanca A", "etiquetaB": "palanca B", "efectosA": {"finanzas": -12..12, "operaciones": -12..12, "talento": -12..12, "mercado": -12..12}, "efectosB": {...}, "posicionOptima": 30-70, "feedbackOptimo": "3 frases", "feedbackExtremoA": "riesgo de exceso hacia A", "feedbackExtremoB": "riesgo de exceso hacia B"},\n' +
     ' {"tipo": "doble", "narrativa": "3 frases: problema complejo que exige dos decisiones simultáneas", "concepto": "marco integrador", "subdecisiones": [2 objetos {"modulo": "' + subMod1 + '" o "' + subMod2 + '", "titulo": "la decisión a tomar", "opciones": [3 objetos: una coherente (neto +4 a +7, sin daños profundos), una intermedia, una trampa (un KPI +7, dos KPIs -8 o peor); textos neutros sin pistas]}]}\n' +
     ']}\n' +
-    'Empresa: ' + EMPRESA + ', ' + fase.nombre + ' (año ' + fase.ano + ', ' + fase.empleados + ' empleados, ' + fase.ingresos + '). Estado actual de KPIs: ' + kpisTxt + '. Tema obligatorio: "' + tema.tema + '" (módulo: ' + modulo + '). Contexto macro: ' + contexto + '. Evento: ' + evento + '. Ninguna opción debe dominar en los 4 KPIs y ningún texto puede delatar cuál es la trampa ni cuál la correcta: solo el razonamiento teórico debe permitir distinguirlas.' +
+    'Empresa: ' + EMPRESA + ', startup de ' + sectorActivo().nombre + ' (' + sectorActivo().producto + ' para ' + sectorActivo().cliente + '), ' + fase.nombre + ' (año ' + fase.ano + ', ' + fase.empleados + ' empleados, ' + fase.ingresos + '). Estado actual de KPIs: ' + kpisTxt + '. Tema obligatorio: "' + tema.tema + '" (módulo: ' + modulo + '). Contexto macro: ' + contexto + '. Evento: ' + evento + '. Ninguna opción debe dominar en los 4 KPIs y ningún texto puede delatar cuál es la trampa ni cuál la correcta: solo el razonamiento teórico debe permitir distinguirlas.' +
     (esComb ? ' ATENCIÓN: esta es una ETAPA COMBINADA "' + par.modA + ' + ' + par.modB + '": el dilema de elección debe entrelazar ambos temas y el dilema doble debe usar exactamente los módulos "' + par.modA + '" y "' + par.modB + '".' : '') +
     ' Devuelve solo el JSON.';
   const resp = await fetch('https://api.mistral.ai/v1/chat/completions', {
@@ -744,7 +869,7 @@ function generarEscenarioLocal(etapa) {
   const modulo = moduloDeEtapa(etapa);
   const fase = faseDeEtapa(etapa);
   const contexto = rnd(CONTEXTOS);
-  const evento = rnd(EVENTOS);
+  const evento = rnd(eventosDelSector());
   const esComb = esCombinada(etapa);
   const par = esComb ? parCombinado(etapa) : null;
   const subMods = esComb ? [par.modA, par.modB]
@@ -817,15 +942,16 @@ function construirDilemas(etapa, tema, modulo, fase, contexto, evento, subMods) 
   const eleccion = {
     tipo: 'eleccion',
     concepto: tema.tema + ' — diagnóstico y primera decisión del trimestre',
-    narrativa: fase.narrativa + ' Este trimestre, con ' + contexto.toLowerCase() + ', ' + evento +
-      '. El tema en el tapete es "' + tema.tema + '" y la dirección debe fijar el primer movimiento. Toda opción mueve algo: elige la que tu criterio resista mejor ante el consejo.',
+    narrativa: 'Año ' + fase.ano + '. ' + fase.narrativa + ' Este trimestre, con ' + contexto.toLowerCase() + ', ' + evento +
+      '. Como CEO de Nimbus (' + sectorActivo().producto + ' para ' + sectorActivo().cliente + '), el tema en el tapete es "' + tema.tema +
+      '" y la dirección debe fijar el primer movimiento. Toda opción mueve algo: elige la que tu criterio resista mejor ante el consejo.',
     opciones: shuffle(OPCIONES_NEUTRAS.slice())
   };
   const opt = Math.floor(35 + Math.random() * 31);
   const slider = {
     tipo: 'slider',
     concepto: tema.tema + ' — asignación de recursos bajo información incompleta',
-    narrativa: 'El comité aprueba un fondo extraordinario para responder a ' + evento + '. La dirección está partida en dos: una parte pide consolidar lo que ya funciona; la otra, adelantar la siguiente curva en torno a "' + tema.tema +
+    narrativa: 'El comité aprueba un fondo extraordinario para responder a ' + evento + '. La dirección está partida en dos: una parte pide blindar ' + sectorActivo().producto + ' tal cual está; la otra, adelantar la siguiente curva en torno a "' + tema.tema +
       '". Tú decides el reparto exacto. Los impactos sobre tus KPIs quedan ocultos: dispones de los informes de los analistas, que rara vez coinciden.',
     etiquetaA: 'Consolidar la máquina actual',
     etiquetaB: 'Construir la siguiente curva',
@@ -840,7 +966,7 @@ function construirDilemas(etapa, tema, modulo, fase, contexto, evento, subMods) 
     tipo: 'doble',
     concepto: 'Coherencia estratégica entre dominios: ' + subMod1 + ' + ' + subMod2,
     narrativa: 'El trimestre cierra con un problema que no se resuelve con una sola palanca: ' + evento +
-      ' exige decisiones simultáneas en ' + subMod1 + ' y en ' + subMod2 + '. El comité espera dos respuestas coherentes entre sí — una mala combinación puede anularse a sí misma.',
+      ' exige decisiones simultáneas en ' + subMod1 + ' y en ' + subMod2 + ' — piensa en cómo afectan ambas a ' + sectorActivo().cliente + '. El comité espera dos respuestas coherentes entre sí: una mala combinación puede anularse a sí misma.',
     subdecisiones: [construirSubdecision(subMod1), construirSubdecision(subMod2)]
   };
   return [eleccion, slider, doble];
@@ -887,7 +1013,9 @@ function renderCabecera() {
   document.getElementById('stage-title').innerHTML = 'Etapa ' + escenario.etapa + ' · ' +
     etiquetaModulos(escenario.etapa) + (escenario.combinada ? ' <span style="color:#f59e0b;">[ETAPA COMBINADA]</span>' : '') +
     ' <span>— ' + escenario.tema + '</span>';
+  const s = sectorActivo();
   document.getElementById('company-strip').innerHTML =
+    '<span class="fase">' + s.icono + ' ' + s.nombre + '</span>' +
     '<span class="fase">' + f.nombre + '</span>' +
     '<span>Año <b>' + f.ano + '</b></span>' +
     '<span><b>' + f.empleados + '</b> empleados</span>' +
@@ -909,8 +1037,14 @@ function textoSituacion() {
     else if (v >= 62) notas.push('✓ ' + nombre + ' llega fortalecida (' + Math.round(v) + '%)');
   });
   const herencia = notas.length ? notas.join(' · ') : 'Los cuatro indicadores llegan en zona estable.';
-  return '<b>Situación de ' + EMPRESA + ' — ' + f.nombre + ':</b> ' + f.narrativa +
+  const s = sectorActivo();
+  let html = '<b>Situación de ' + EMPRESA + ' (' + s.icono + ' ' + s.nombre + ') — ' + f.nombre + ':</b> ' + f.narrativa +
     ' Contexto macro: ' + escenario.contexto.toLowerCase() + '.<br><b>Herencia de etapas anteriores:</b> ' + herencia;
+  if (escenario.presion) {
+    html += '<br><span class="presion-nota">🌡️ Presión del momento: ' + escenario.presion.nota +
+      ' (<b>-' + escenario.presion.golpe + ' ' + KPI_LABELS_CORTOS[escenario.presion.kpi] + '</b> al empezar el trimestre)</span>';
+  }
+  return html;
 }
 
 function mostrarTeoria() {
@@ -1388,7 +1522,7 @@ function mostrarResultado() {
     title.className = 'result-title win';
     const prox = escenario.etapa < 100 ? escenario.etapa + 1 : null;
     msg.innerHTML = 'Has completado la Etapa ' + escenario.etapa + ' (' + escenario.tema + ') con los cuatro indicadores fuera de zona de riesgo. ' +
-      'La empresa se estabiliza entre etapas (los KPIs revierten ligeramente hacia el 50%) y <b>estos valores se heredan en la siguiente etapa</b>.' +
+      'Sobreviviste a la presión del momento (' + (escenario.presion ? escenario.presion.nota.toLowerCase() : 'sin golpes externos') + '). <b>Estos valores se heredan en la siguiente etapa</b>: no hay rebotes gratuitos.' +
       (prox ? ' Siguiente: Etapa ' + prox + ' · ' + etiquetaModulos(prox) + ' — ' + temaDeEtapa(prox).tema : '');
     document.getElementById('btn-next').style.display = prox ? 'block' : 'none';
     document.getElementById('btn-retry').style.display = 'none';
