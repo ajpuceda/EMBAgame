@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>EMBA Game — Mapa de Ruta</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    background: #0a0f1d;
+    color: #e2e8f0;
+    font-family: 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  .header { width: 100%; max-width: 1000px; padding: 32px 20px 10px; text-align: center; }
+  .header h1 { font-size: 1.6rem; font-weight: 700; letter-spacing: .5px; }
+  .header h1 span { color: #00f2fe; }
+  .header p { color: #94a3b8; font-size: .85rem; margin-top: 8px; line-height: 1.6; }
+  .stats {
+    display: flex; gap: 14px; justify-content: center; flex-wrap: wrap;
+    margin: 18px 0 6px;
+  }
+  .stat {
+    background: #161f38; border: 1px solid #232f52; border-radius: 12px;
+    padding: 12px 22px; text-align: center; min-width: 130px;
+  }
+  .stat .num { font-size: 1.4rem; font-weight: 700; color: #00f2fe; }
+  .stat .lbl { font-size: .72rem; color: #94a3b8; margin-top: 4px; }
+  .modulos {
+    width: 100%; max-width: 1000px; padding: 10px 20px 40px;
+  }
+  .modulo-card { margin-bottom: 26px; }
+  .modulo-head {
+    display: flex; align-items: baseline; justify-content: space-between;
+    border-bottom: 1px solid #232f52; padding-bottom: 8px; margin-bottom: 14px;
+  }
+  .modulo-head h2 { color: #00f2fe; font-size: 1.05rem; letter-spacing: 1px; }
+  .modulo-head .range { color: #94a3b8; font-size: .75rem; }
+  .etapas { display: grid; grid-template-columns: repeat(auto-fill, minmax(88px, 1fr)); gap: 10px; }
+  .etapa {
+    background: #161f38; border: 1px solid #232f52; border-radius: 10px;
+    padding: 10px 6px; text-align: center; cursor: pointer;
+    transition: border-color .2s, transform .15s; user-select: none;
+  }
+  .etapa:hover { border-color: #00f2fe; transform: translateY(-2px); }
+  .etapa .n { font-size: 1.05rem; font-weight: 700; color: #e2e8f0; }
+  .etapa .t { font-size: .6rem; color: #94a3b8; margin-top: 4px; line-height: 1.35;
+    overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
+  .etapa.completada { border-color: rgba(34,197,94,.6); background: rgba(34,197,94,.07); }
+  .etapa.completada .n { color: #22c55e; }
+  .etapa.completada .n::after { content: ' ✓'; }
+  .etapa.bloqueada { opacity: .45; cursor: not-allowed; }
+  .etapa.combinada .n { color: #f59e0b; }
+  .etapa.siguiente { border-color: #00f2fe; box-shadow: 0 0 14px rgba(0,242,254,.25); }
+  .etapa.siguiente .n { color: #00f2fe; }
+  .etapas-legend {
+    display: flex; gap: 18px; flex-wrap: wrap; justify-content: center;
+    color: #94a3b8; font-size: .75rem; margin: 4px 0 24px;
+  }
+  .legend-dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 6px; vertical-align: middle; }
+  .btn-main {
+    display: block; margin: 4px auto 30px;
+    background: #00f2fe; color: #0a0f1d; border: none; border-radius: 12px;
+    padding: 14px 34px; font-weight: 700; font-size: 1rem; cursor: pointer;
+    font-family: inherit; transition: background .2s;
+  }
+  .btn-main:hover { background: #6ff7ff; }
+  .modal-backdrop {
+    position: fixed; inset: 0; background: rgba(4,8,20,.8);
+    display: flex; align-items: center; justify-content: center; padding: 20px; z-index: 50;
+  }
+  .modal {
+    background: #161f38; border: 1px solid #00f2fe; border-radius: 16px;
+    max-width: 540px; width: 100%; padding: 28px;
+    box-shadow: 0 0 40px rgba(0,242,254,.22);
+  }
+  .modal h3 { color: #00f2fe; margin-bottom: 10px; font-size: 1.05rem; }
+  .modal p { font-size: .88rem; line-height: 1.65; color: #e2e8f0; margin-bottom: 12px; }
+  .modal .modulo-tag {
+    display: inline-block; color: #00f2fe; border: 1px solid rgba(0,242,254,.4);
+    border-radius: 999px; padding: 3px 12px; font-size: .72rem; margin-bottom: 12px;
+  }
+  .modal .btn-row { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; margin-top: 16px; }
+  .modal button {
+    background: #00f2fe; color: #0a0f1d; border: none; border-radius: 10px;
+    padding: 12px 22px; font-weight: 700; font-size: .9rem; cursor: pointer; font-family: inherit;
+  }
+  .modal button:hover { background: #6ff7ff; }
+  .modal button.btn-cancel { background: transparent; color: #94a3b8; border: 1px solid #2b3a63; }
+  .status-line { text-align: center; color: #94a3b8; font-size: .78rem; min-height: 1.2em; margin-bottom: 30px; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>EMBA <span>Game</span> — Mapa de Ruta</h1>
+  <p>Plan de estudios EMBA de 100 etapas en 5 módulos. Completa cada etapa en el simulador de decisiones estratégicas para desbloquear la siguiente.</p>
+  <div class="stats">
+    <div class="stat"><div class="num" id="stat-completadas">0</div><div class="lbl">Etapas completadas</div></div>
+    <div class="stat"><div class="num" id="stat-puntos">0</div><div class="lbl">Puntuación global</div></div>
+    <div class="stat"><div class="num" id="stat-progreso">0%</div><div class="lbl">Plan de estudios</div></div>
+  </div>
+  <div class="etapas-legend">
+    <span><span class="legend-dot" style="background:#22c55e"></span>Completada</span>
+    <span><span class="legend-dot" style="background:#00f2fe"></span>Siguiente etapa</span>
+    <span><span class="legend-dot" style="background:#232f52"></span>Bloqueada</span>
+  </div>
+</div>
+
+<div class="modulos" id="modulos-container"></div>
+
+<button class="btn-main" id="btn-continuar">▶ Continuar mi etapa</button>
+<div class="status-line" id="map-status"></div>
+
+<div class="modal-backdrop" id="modal-backdrop" style="display:none;">
+  <div class="modal">
+    <span class="modulo-tag" id="modal-modulo"></span>
+    <h3 id="modal-tema"></h3>
+    <p id="modal-desc"></p>
+    <div class="btn-row">
+      <button id="btn-jugar">Afrontar esta etapa</button>
+      <button class="btn-cancel" id="btn-cancel">Volver al mapa</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const TEMAS_EMBA = {
+    1: { modulo: "Estrategia", tema: "Ventaja Competitiva y Posicionamiento (Michael Porter)" },
+    2: { modulo: "Estrategia", tema: "Estrategia del Océano Azul y Creación de Nuevos Mercados" },
+    3: { modulo: "Estrategia", tema: "Análisis de Recursos, Capacidades y Ventaja Sostenible (VRIO)" },
+    4: { modulo: "Estrategia", tema: "Disrupción Tecnológica y Dilema del Innovador (Clayton Christensen)" },
+    5: { modulo: "Estrategia", tema: "Estrategias de Crecimiento: Matriz de Ansoff" },
+    6: { modulo: "Estrategia", tema: "Integración Vertical vs Sourcing Estratégico (Hacer o Comprar)" },
+    7: { modulo: "Estrategia", tema: "Fusiones y Adquisiciones (M&A): Sinergias Corporativas" },
+    8: { modulo: "Estrategia", tema: "Alianzas Estratégicas y Joint Ventures Internacionales" },
+    9: { modulo: "Estrategia", tema: "Estrategias de Plataforma y Efectos de Red (Network Effects)" },
+    10: { modulo: "Estrategia", tema: "Teoría de Juegos Aplicada a la Competencia (Equilibrio de Nash)" },
+    11: { modulo: "Estrategia", tema: "Modelos de Negocio SaaS y Escalabilidad de Margen Bruto" },
+    12: { modulo: "Estrategia", tema: "Globalización: Adaptación Local vs Estandarización Global (Glocal)" },
+    13: { modulo: "Estrategia", tema: "Gestión del Cambio Organizacional (Modelo de 8 Pasos de Kotter)" },
+    14: { modulo: "Estrategia", tema: "Gobierno Corporativo, Activismo de Inversores y Consejo de Administración" },
+    15: { modulo: "Estrategia", tema: "Sostenibilidad Estratégica, Criterios ESG y Triple Balance" },
+    16: { modulo: "Estrategia", tema: "Gestión de Riesgos Geopolíticos y Resiliencia Corporativa" },
+    17: { modulo: "Estrategia", tema: "Planificación de Escenarios Futuros y Agilidad Estratégica" },
+    18: { modulo: "Estrategia", tema: "Ecosistemas de Innovación Abierta y Venture Building Corporativo" },
+    19: { modulo: "Estrategia", tema: "Estrategias de Salida (Exit): Salida a Bolsa (IPO) vs Venta Estratégica" },
+    20: { modulo: "Estrategia", tema: "Liderazgo en Tiempos de Crisis y Gestión de Turnaround Empresarial" },
+    21: { modulo: "Finanzas", tema: "Análisis de Estados Financieros: Balance y Cuenta de Resultados" },
+    22: { modulo: "Finanzas", tema: "Gestión de Tesorería, Optimización del Flujo de Caja y Capital de Trabajo" },
+    23: { modulo: "Finanzas", tema: "Cálculo del Coste de Capital (WACC) y Estructura de Capital Óptima" },
+    24: { modulo: "Finanzas", tema: "Presupuestación de Capital y Evaluación de Proyectos (VAN y TIR)" },
+    25: { modulo: "Finanzas", tema: "Valoración de Empresas: Descuento de Flujos de Caja (DCF) vs Múltiplos" },
+    26: { modulo: "Finanzas", tema: "Apalancamiento Financiero y Gestión del Riesgo de Crédito" },
+    27: { modulo: "Finanzas", tema: "Financiación de Startups: Rondas de Inversión y Dilución" },
+    28: { modulo: "Finanzas", tema: "Venture Capital vs Private Equity: Estructuración de Deals" },
+    29: { modulo: "Finanzas", tema: "Dividendos y Recompra de Acciones: Política de Retribución" },
+    30: { modulo: "Finanzas", tema: "Contabilidad de Costes: Costes Fijos, Variables y Punto de Equilibrio" },
+    31: { modulo: "Finanzas", tema: "Auditoría Interna, Control de Gestión y Prevención del Fraude" },
+    32: { modulo: "Finanzas", tema: "Mercados de Capitales: Emisión de Deuda, Bonos y Financiación" },
+    33: { modulo: "Finanzas", tema: "Estrategias de Cobertura Financiera (Hedging) con Derivados" },
+    34: { modulo: "Finanzas", tema: "Finanzas Internacionales: Repatriación de Capitales" },
+    35: { modulo: "Finanzas", tema: "Project Finance y Financiación de Grandes Infraestructuras" },
+    36: { modulo: "Finanzas", tema: "Estructuras Fiscales Eficientes y Planificación Fiscal Corporativa" },
+    37: { modulo: "Finanzas", tema: "Reestructuración de Deuda y Concurso de Acreedores" },
+    38: { modulo: "Finanzas", tema: "Activos Digitales, Blockchain y la Tokenización Financiera" },
+    39: { modulo: "Finanzas", tema: "Finanzas Conductuales (Behavioral Finance) en Decisiones" },
+    40: { modulo: "Finanzas", tema: "Modelización Financiera Avanzada y Análisis de Sensibilidad" },
+    41: { modulo: "Marketing", tema: "Segmentación de Mercado, Targeting y Posicionamiento" },
+    42: { modulo: "Marketing", tema: "Estrategias de Fijación de Precios (Pricing): Valor vs Coste" },
+    43: { modulo: "Marketing", tema: "Customer Lifetime Value (CLV) vs Customer Acquisition Cost (CAC)" },
+    44: { modulo: "Marketing", tema: "Estrategias de Branding, Arquitectura de Marca y Brand Equity" },
+    45: { modulo: "Marketing", tema: "Inbound Marketing, Growth Hacking y Embudos de Conversión" },
+    46: { modulo: "Marketing", tema: "Marketing Omnicanal y Gestión de Canales (Go-To-Market)" },
+    47: { modulo: "Marketing", tema: "Lanzamiento de Nuevos Productos (NPD) y Metodología Stage-Gate" },
+    48: { modulo: "Marketing", tema: "Product-Market Fit y Estrategias de Retención de Clientes" },
+    49: { modulo: "Marketing", tema: "Gestión de la Experiencia del Cliente (CX) y Net Promoter Score" },
+    50: { modulo: "Marketing", tema: "Marketing de Redes Sociales, Viralidad y Creadores" },
+    51: { modulo: "Marketing", tema: "B2B Marketing: Gestión de Grandes Cuentas (Key Account)" },
+    52: { modulo: "Marketing", tema: "Neuromarketing y Psicología del Consumidor en Decisiones" },
+    53: { modulo: "Marketing", tema: "Estrategias de Trade Marketing y Gestión de Retail" },
+    54: { modulo: "Marketing", tema: "Publicidad Programática, Atribución y Modelos MMM" },
+    55: { modulo: "Marketing", tema: "Marketing Internacional y Barreras Culturales en Nuevos Mercados" },
+    56: { modulo: "Marketing", tema: "Gestión de Crisis de Reputación de Marca en Entornos Digitales" },
+    57: { modulo: "Marketing", tema: "Estrategias de Relaciones Públicas y Liderazgo de Opinión" },
+    58: { modulo: "Marketing", tema: "Modelos de Suscripción y Economía de la Recurrencia" },
+    59: { modulo: "Marketing", tema: "Inteligencia de Mercado, Big Data y Analítica Predictiva" },
+    60: { modulo: "Marketing", tema: "Estrategias de Defendibilidad de Mercado frente a Imitadores" },
+    61: { modulo: "Operaciones", tema: "Gestión de Procesos: Análisis de Cuellos de Botella y Ley de Little" },
+    62: { modulo: "Operaciones", tema: "Lean Management, Desperdicios (Muda) y Filosofía Kaizen" },
+    63: { modulo: "Operaciones", tema: "Seis Sigma (Six Sigma): Calidad Total y Control Estadístico" },
+    64: { modulo: "Operaciones", tema: "Diseño y Resiliencia de la Cadena de Suministro Global" },
+    65: { modulo: "Operaciones", tema: "Gestión de Inventarios: Modelo EOQ frente a Just-in-Time" },
+    66: { modulo: "Operaciones", tema: "Logística Inversa y Economía Circular en Operaciones" },
+    67: { modulo: "Operaciones", tema: "Automatización Industrial, Robótica Avanzada e Industria 4.0" },
+    68: { modulo: "Operaciones", tema: "Implementación de Sistemas ERP y CRM en la Integración" },
+    69: { modulo: "Operaciones", tema: "Subcontratación Estratégica (Outsourcing) y Gestión de Proveedores" },
+    70: { modulo: "Operaciones", tema: "Gestión de la Capacidad y Planificación Agregada" },
+    71: { modulo: "Operaciones", tema: "Inteligencia Artificial Aplicada a la Optimización Predictiva" },
+    72: { modulo: "Operaciones", tema: "Transformación Digital de Infraestructuras Tradicionales" },
+    73: { modulo: "Operaciones", tema: "Gestión de Proyectos Críticos: Agile (Scrum/Kanban) vs Waterfall" },
+    74: { modulo: "Operaciones", tema: "Ciberseguridad Corporativa, Continuidad del Negocio y Planes DR" },
+    75: { modulo: "Operaciones", tema: "Sostenibilidad Operativa: Descarbonización de la Cadena de Valor" },
+    76: { modulo: "Operaciones", tema: "Compras Globales, Aranceles y Aduanas Internacionales" },
+    77: { modulo: "Operaciones", tema: "Diseño de Servicios de Alta Disponibilidad y Acuerdos SLA" },
+    78: { modulo: "Operaciones", tema: "Mantenimiento Predictivo mediante IoT (Internet de las Cosas)" },
+    79: { modulo: "Operaciones", tema: "Escalabilidad Operativa: De Startup Local a Multiregional" },
+    80: { modulo: "Operaciones", tema: "Gobernanza de Datos y Ética en la Implementación de IA" },
+    81: { modulo: "Capital Humano", tema: "Diseño Organizacional, Estructuras Matriciales y Reporte" },
+    82: { modulo: "Capital Humano", tema: "Cultura Organizacional como Ventaja Competitiva" },
+    83: { modulo: "Capital Humano", tema: "Atracción y Retención de Talento: Planes de Carrera e Incentivos" },
+    84: { modulo: "Capital Humano", tema: "Modelos de Compensación: Variables, Stock Options y Phantom Shares" },
+    85: { modulo: "Capital Humano", tema: "Evaluación del Desempeño, Feedback 360 y High Potentials" },
+    86: { modulo: "Capital Humano", tema: "Gestión de Equipos Multiculturales y Remotos Globales" },
+    87: { modulo: "Capital Humano", tema: "Resolución de Conflictos Laborales y Negociación Colectiva" },
+    88: { modulo: "Capital Humano", tema: "Técnicas de Negociación Avanzada: Método de Harvard" },
+    89: { modulo: "Capital Humano", tema: "Liderazgo Ejecutivo, Estilos de Mando e Inteligencia Emocional" },
+    90: { modulo: "Capital Humano", tema: "Planes de Sucesión de la Alta Dirección y Transiciones de CEOs" },
+    91: { modulo: "Capital Humano", tema: "Diversidad, Equidad e Inclusión (DEI) como Motor de Innovación" },
+    92: { modulo: "Capital Humano", tema: "Estrés Ejecutivo, Burnout y Programas de Bienestar Corporativo" },
+    93: { modulo: "Capital Humano", tema: "People Analytics: Uso de Datos para Optimización de Plantillas" },
+    94: { modulo: "Capital Humano", tema: "Liderazgo Inspiracional, Storytelling y Comunicación de Impacto" },
+    95: { modulo: "Capital Humano", tema: "Gestión de Despidos Masivos (Layoffs) y Outplacement Ético" },
+    96: { modulo: "Capital Humano", tema: "Estrategias de Formación Continua (Upskilling y Reskilling)" },
+    97: { modulo: "Capital Humano", tema: "Estructuración de Equipos de Alto Rendimiento y Células Ágiles" },
+    98: { modulo: "Capital Humano", tema: "Psicología Organizacional y Gestión de la Resistencia al Cambio" },
+    99: { modulo: "Capital Humano", tema: "Liderazgo Ético, Cumplimiento Normativo (Compliance) y Conducta" },
+    100: { modulo: "Capital Humano", tema: "El Futuro del Trabajo: Modelos Híbridos, Automatización y el CEO" }
+};
+
+const ORDEN_MODULOS = ['Estrategia', 'Finanzas', 'Marketing', 'Operaciones'];
+const MODULO_ICONO = { 'Estrategia': '♟️', 'Finanzas': '💰', 'Marketing': '📈', 'Operaciones': '⚙️', 'Capital Humano': '👥' };
+
+function temasDe(modulo) {
+  return Object.keys(TEMAS_EMBA).filter(k => TEMAS_EMBA[k].modulo === modulo).map(k => TEMAS_EMBA[k]);
+}
+function esCombinada(n) { return n % 5 === 0; }
+function infoEtapa(n) {
+  const ciclo = Math.floor((n - 1) / 5);
+  const posEnCiclo = (n - 1) % 5;
+  if (esCombinada(n)) {
+    const partner = ORDEN_MODULOS[ciclo % 4];
+    return {
+      modulos: 'Capital Humano 🔗 ' + partner,
+      icono: MODULO_ICONO['Capital Humano'] + MODULO_ICONO[partner],
+      tema: temasDe('Capital Humano')[ciclo].tema + ' × ' + temasDe(partner)[ciclo].tema,
+      combinada: true
+    };
+  }
+  const mod = ORDEN_MODULOS[posEnCiclo];
+  return { modulos: mod, icono: MODULO_ICONO[mod], tema: temasDe(mod)[ciclo].tema, combinada: false };
+}
+
+let completadas = [];
+let puntuacion = 0;
+let etapaSeleccionada = null;
+
+function leerProgreso() {
+  try {
+    const p = JSON.parse(localStorage.getItem('emba_progreso'));
+    if (p && typeof p === 'object') {
+      if (Array.isArray(p.etapas_completadas)) completadas = p.etapas_completadas.filter(n => n >= 1 && n <= 100);
+      puntuacion = p.puntuacion_global || 0;
+    }
+  } catch (e) { completadas = []; puntuacion = 0; }
+}
+
+function maxCompletada() {
+  return completadas.length ? Math.max.apply(null, completadas) : 0;
+}
+
+function siguienteEtapa() {
+  const m = maxCompletada();
+  return m < 100 ? m + 1 : 100;
+}
+
+function renderStats() {
+  document.getElementById('stat-completadas').textContent = completadas.length;
+  document.getElementById('stat-puntos').textContent = puntuacion;
+  document.getElementById('stat-progreso').textContent = Math.round(completadas.length) + '%';
+}
+
+function renderMapa() {
+  const cont = document.getElementById('modulos-container');
+  cont.innerHTML = '';
+  const sig = siguienteEtapa();
+  for (let ciclo = 0; ciclo < 20; ciclo++) {
+    const desde = ciclo * 5 + 1;
+    const card = document.createElement('div');
+    card.className = 'modulo-card';
+    const head = document.createElement('div');
+    head.className = 'modulo-head';
+    head.innerHTML = '<h2>Ciclo ' + (ciclo + 1) + ' — Etapas ' + desde + '–' + (desde + 4) + '</h2>' +
+      '<span class="range">' + ORDEN_MODULOS.map(m => MODULO_ICONO[m] + ' ' + m).join(' → ') + ' + 🔗 combinada</span>';
+    card.appendChild(head);
+    const grid = document.createElement('div');
+    grid.className = 'etapas';
+    for (let n = desde; n <= desde + 4; n++) {
+      const info = infoEtapa(n);
+      const box = document.createElement('div');
+      const done = completadas.includes(n);
+      const esSiguiente = n === sig && !done;
+      box.className = 'etapa' + (done ? ' completada' : '') + (esSiguiente ? ' siguiente' : '') +
+        (!done && !esSiguiente ? ' bloqueada' : '') + (info.combinada ? ' combinada' : '');
+      box.innerHTML = '<div class="n">' + info.icono + ' ' + n + (info.combinada ? ' 🔗' : '') + '</div><div class="t">' + info.tema + '</div>';
+      if (done || esSiguiente) {
+        box.addEventListener('click', () => abrirModal(n));
+      }
+      grid.appendChild(box);
+    }
+    card.appendChild(grid);
+    cont.appendChild(card);
+  }
+}
+
+function abrirModal(n) {
+  etapaSeleccionada = n;
+  const info = infoEtapa(n);
+  document.getElementById('modal-modulo').textContent = (info.combinada ? 'Etapa combinada · ' : '') + info.modulos + ' · Etapa ' + n + ' de 100';
+  document.getElementById('modal-tema').textContent = info.tema;
+  document.getElementById('modal-desc').textContent =
+    'Al entrar, recibirás un briefing con la teoría de este tema y afrontarás 3 dilemas ejecutivos con tus 4 KPIs al 50%. Mantenlos por encima del 0% para superar la etapa y sumar 100 puntos a tu expediente.';
+  document.getElementById('modal-backdrop').style.display = 'flex';
+}
+
+document.getElementById('btn-cancel').addEventListener('click', () => {
+  document.getElementById('modal-backdrop').style.display = 'none';
+});
+
+document.getElementById('btn-jugar').addEventListener('click', () => {
+  localStorage.setItem('emba_etapa_seleccionada', String(etapaSeleccionada));
+  window.location.href = 'juego.html?etapa=' + etapaSeleccionada;
+});
+
+document.getElementById('btn-continuar').addEventListener('click', () => {
+  const sig = siguienteEtapa();
+  localStorage.setItem('emba_etapa_seleccionada', String(sig));
+  window.location.href = 'juego.html?etapa=' + sig;
+});
+
+leerProgreso();
+renderStats();
+renderMapa();
+</script>
+</body>
+</html>
