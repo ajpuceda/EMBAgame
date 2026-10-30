@@ -53,6 +53,7 @@
   .etapa.completada .n { color: #22c55e; }
   .etapa.completada .n::after { content: ' ✓'; }
   .etapa.bloqueada { opacity: .45; cursor: not-allowed; }
+  .etapa.combinada .n { color: #f59e0b; }
   .etapa.siguiente { border-color: #00f2fe; box-shadow: 0 0 14px rgba(0,242,254,.25); }
   .etapa.siguiente .n { color: #00f2fe; }
   .etapas-legend {
@@ -230,13 +231,28 @@ const TEMAS_EMBA = {
     100: { modulo: "Capital Humano", tema: "El Futuro del Trabajo: Modelos Híbridos, Automatización y el CEO" }
 };
 
-const MODULOS = [
-  { nombre: 'Estrategia', rango: [1, 20], icono: '♟️' },
-  { nombre: 'Finanzas', rango: [21, 40], icono: '💰' },
-  { nombre: 'Marketing', rango: [41, 60], icono: '📈' },
-  { nombre: 'Operaciones', rango: [61, 80], icono: '⚙️' },
-  { nombre: 'Capital Humano', rango: [81, 100], icono: '👥' }
-];
+const ORDEN_MODULOS = ['Estrategia', 'Finanzas', 'Marketing', 'Operaciones'];
+const MODULO_ICONO = { 'Estrategia': '♟️', 'Finanzas': '💰', 'Marketing': '📈', 'Operaciones': '⚙️', 'Capital Humano': '👥' };
+
+function temasDe(modulo) {
+  return Object.keys(TEMAS_EMBA).filter(k => TEMAS_EMBA[k].modulo === modulo).map(k => TEMAS_EMBA[k]);
+}
+function esCombinada(n) { return n % 5 === 0; }
+function infoEtapa(n) {
+  const ciclo = Math.floor((n - 1) / 5);
+  const posEnCiclo = (n - 1) % 5;
+  if (esCombinada(n)) {
+    const partner = ORDEN_MODULOS[ciclo % 4];
+    return {
+      modulos: 'Capital Humano 🔗 ' + partner,
+      icono: MODULO_ICONO['Capital Humano'] + MODULO_ICONO[partner],
+      tema: temasDe('Capital Humano')[ciclo].tema + ' × ' + temasDe(partner)[ciclo].tema,
+      combinada: true
+    };
+  }
+  const mod = ORDEN_MODULOS[posEnCiclo];
+  return { modulos: mod, icono: MODULO_ICONO[mod], tema: temasDe(mod)[ciclo].tema, combinada: false };
+}
 
 let completadas = [];
 let puntuacion = 0;
@@ -271,23 +287,25 @@ function renderMapa() {
   const cont = document.getElementById('modulos-container');
   cont.innerHTML = '';
   const sig = siguienteEtapa();
-  MODULOS.forEach(mod => {
+  for (let ciclo = 0; ciclo < 20; ciclo++) {
+    const desde = ciclo * 5 + 1;
     const card = document.createElement('div');
     card.className = 'modulo-card';
     const head = document.createElement('div');
     head.className = 'modulo-head';
-    head.innerHTML = '<h2>' + mod.icono + ' ' + mod.nombre + '</h2><span class="range">Etapas ' +
-      mod.rango[0] + '–' + mod.rango[1] + '</span>';
+    head.innerHTML = '<h2>Ciclo ' + (ciclo + 1) + ' — Etapas ' + desde + '–' + (desde + 4) + '</h2>' +
+      '<span class="range">' + ORDEN_MODULOS.map(m => MODULO_ICONO[m] + ' ' + m).join(' → ') + ' + 🔗 combinada</span>';
     card.appendChild(head);
     const grid = document.createElement('div');
     grid.className = 'etapas';
-    for (let n = mod.rango[0]; n <= mod.rango[1]; n++) {
+    for (let n = desde; n <= desde + 4; n++) {
+      const info = infoEtapa(n);
       const box = document.createElement('div');
       const done = completadas.includes(n);
       const esSiguiente = n === sig && !done;
       box.className = 'etapa' + (done ? ' completada' : '') + (esSiguiente ? ' siguiente' : '') +
-        (!done && !esSiguiente ? ' bloqueada' : '');
-      box.innerHTML = '<div class="n">' + n + '</div><div class="t">' + TEMAS_EMBA[n].tema + '</div>';
+        (!done && !esSiguiente ? ' bloqueada' : '') + (info.combinada ? ' combinada' : '');
+      box.innerHTML = '<div class="n">' + info.icono + ' ' + n + (info.combinada ? ' 🔗' : '') + '</div><div class="t">' + info.tema + '</div>';
       if (done || esSiguiente) {
         box.addEventListener('click', () => abrirModal(n));
       }
@@ -295,13 +313,14 @@ function renderMapa() {
     }
     card.appendChild(grid);
     cont.appendChild(card);
-  });
+  }
 }
 
 function abrirModal(n) {
   etapaSeleccionada = n;
-  document.getElementById('modal-modulo').textContent = TEMAS_EMBA[n].modulo + ' · Etapa ' + n + ' de 100';
-  document.getElementById('modal-tema').textContent = TEMAS_EMBA[n].tema;
+  const info = infoEtapa(n);
+  document.getElementById('modal-modulo').textContent = (info.combinada ? 'Etapa combinada · ' : '') + info.modulos + ' · Etapa ' + n + ' de 100';
+  document.getElementById('modal-tema').textContent = info.tema;
   document.getElementById('modal-desc').textContent =
     'Al entrar, recibirás un briefing con la teoría de este tema y afrontarás 3 dilemas ejecutivos con tus 4 KPIs al 50%. Mantenlos por encima del 0% para superar la etapa y sumar 100 puntos a tu expediente.';
   document.getElementById('modal-backdrop').style.display = 'flex';

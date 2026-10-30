@@ -224,6 +224,7 @@
 </head>
 <body>
 
+<button class="api-fab" id="mapa-fab" title="Ver el mapa de ruta completo" style="right:120px;">🗺️ Mapa de ruta</button>
 <button class="api-fab" id="api-fab" title="Cambiar clave API de Mistral">🔑 API IA</button>
 
 <div class="overlay-backdrop" id="apikey-overlay" style="display:none;">
@@ -687,6 +688,10 @@ document.getElementById('btn-start').addEventListener('click', async () => {
   document.getElementById('objetivo-bar').style.display = 'block';
   document.getElementById('kpis-panel').style.display = 'grid';
   await cargarEtapa(detectarEtapa());
+});
+
+document.getElementById('mapa-fab').addEventListener('click', () => {
+  window.location.href = 'index.html';
 });
 
 /* Botón lateral de clave API */
@@ -1166,16 +1171,16 @@ function construirDatosAnalistas(d) {
       '<text x="' + (pad + 2) + '" y="' + (H - 10) + '" fill="#64748b" font-size="9">100% A</text>' +
       '<text x="' + (W - pad - 32) + '" y="' + (H - 10) + '" fill="#64748b" font-size="9">100% B</text>' +
       '<text x="' + (pad - 6) + '" y="' + (pad + 8) + '" fill="#64748b" font-size="8" transform="rotate(-90 ' + (pad - 10) + ' ' + (pad + 14) + ')">Índice (0-100)</text>' +
-      '<polyline points="' + puntosCurva(curvaRuido2) + '" fill="none" stroke="#475569" stroke-width="1.5" stroke-dasharray="2,3" opacity=".7"/>' +
-      '<polyline points="' + puntosCurva(curvaRuido1) + '" fill="none" stroke="#64748b" stroke-width="1.5" stroke-dasharray="2,3" opacity=".7"/>' +
-      '<polyline points="' + puntosCurva(curvaMargen) + '" fill="none" stroke="#00f2fe" stroke-width="2.5"/>' +
-      '<polyline points="' + puntosCurva(curvaRiesgoLiquido) + '" fill="none" stroke="#ef4444" stroke-width="2.5"/>' +
+      '<polyline points="' + puntosCurva(curvaRuido1) + '" fill="none" stroke="#a78bfa" stroke-width="1.8"/>' +
+      '<polyline points="' + puntosCurva(curvaRuido2) + '" fill="none" stroke="#f59e0b" stroke-width="1.8"/>' +
+      '<polyline points="' + puntosCurva(curvaMargen) + '" fill="none" stroke="#00f2fe" stroke-width="2.8"/>' +
+      '<polyline points="' + puntosCurva(curvaRiesgoLiquido) + '" fill="none" stroke="#ef4444" stroke-width="2.8"/>' +
     '</svg>' +
     '<div class="chart-legend">' +
       '<span><i style="background:#00f2fe"></i><b>Margen operativo a 12M</b> (contable, fiable)' +
       '<span><i style="background:#ef4444"></i><b>Riesgo de liquidez</b> (tesorería, fiable)' +
-      '<span><i style="background:#64748b"></i>Satisfacción de plantilla (encuesta interna)' +
-      '<span><i style="background:#475569"></i>Menciones de marca (medición externa)' +
+      '<span><i style="background:#a78bfa"></i>Satisfacción de plantilla (encuesta interna)' +
+      '<span><i style="background:#f59e0b"></i>Menciones de marca (medición externa)' +
     '</div>' +
     '<p style="font-size:.72rem; color:#94a3b8; line-height:1.5; margin-top:8px;">' +
       'Las cuatro series están correlacionadas entre sí, pero solo <b style="color:#00f2fe">dos</b> describen de verdad lo que le pasará a tu empresa: ' +
@@ -1302,18 +1307,28 @@ function construirNotaContexto(impactos, kpisAntes) {
   const anchos = KPI_KEYS.map(k => ({ k: k, margen: kpisAntes[k] - UMBRAL_COLAPSO }));
   const masAncho = anchos.reduce((a, b) => (b.margen > a.margen ? b : a));
   const masEstrecho = anchos.reduce((a, b) => (b.margen < a.margen ? b : a));
+  const sit = situacionFinanciera(kpisAntes);
+  let recomendacion;
+  if (sit.nivel === 'critica') {
+    recomendacion = 'Recomendación en esta situación: <b>defender la supervivencia</b> — prioriza decisiones que no toquen tu variable en zona crítica y reconstruye colchón antes de volver a apostar.';
+  } else if (sit.nivel === 'delicada') {
+    recomendacion = 'Recomendación en esta situación: <b>prudencia selectiva</b> — puedes ceder terreno solo donde haya colchón, y nunca en tu variable más débil.';
+  } else if (sit.nivel === 'ajustada') {
+    recomendacion = 'Recomendación en esta situación: <b>equilibrio gestionado</b> — hay espacio para trade-offs, pero cada cesión debería comprarse con una ganancia medible.';
+  } else {
+    recomendacion = 'Recomendación en esta situación: <b>puedes invertir holgura</b> — es el momento de financiar la siguiente curva; desaprovechar una holgura también es una decisión.';
+  }
   if (masAncho.margen >= 25 && impactos[masAncho.k] < 0) {
-    return '📌 Análisis situacional: tu ' + KPI_LABELS_CORTOS[masAncho.k] + ' partía con mucho margen (' +
-      Math.round(kpisAntes[masAncho.k]) + '%), así que este sacrificio era <b>asumible</b> — en una situación económica muy holgada, esta decisión podía ser incluso la ideal. ' +
-      'Pero ojo: esa holgura es herencia de decisiones anteriores, no un derecho permanente. Si hubieras llegado con ' + KPI_LABELS_CORTOS[masAncho.k] + ' apretada, la misma elección habría sido temeraria.';
+    return '📌 Análisis situacional (' + sit.etiqueta + '): tu ' + KPI_LABELS_CORTOS[masAncho.k] + ' partía con margen (' +
+      Math.round(kpisAntes[masAncho.k]) + '%), así que este sacrificio era <b>asumible aquí y ahora</b> — pero si hubieras llegado con esa variable apretada, la misma elección habría sido temeraria. ' + recomendacion;
   }
   if (masEstrecho.margen <= 12) {
-    return '📌 Análisis situacional: tu ' + KPI_LABELS_CORTOS[masEstrecho.k] + ' llegó a esta ronda con solo ' +
-      Math.round(kpisAntes[masEstrecho.k]) + '% — margen mínimo sobre el umbral del ' + UMBRAL_COLAPSO + '%. En esta situación de partida, cualquier decisión que toque esa variable debe evaluarse con lupa: aquí no hay colchón que absorba errores de cálculo.';
+    return '📌 Análisis situacional (' + sit.etiqueta + '): tu ' + KPI_LABELS_CORTOS[masEstrecho.k] + ' llegó con solo ' +
+      Math.round(kpisAntes[masEstrecho.k]) + '% — margen mínimo sobre el umbral del ' + UMBRAL_COLAPSO + '%. Toda decisión que toque esa variable debe evaluarse con lupa: aquí no hay colchón que absorba errores. ' + recomendacion;
   }
-  return '📌 Análisis situacional: partes con márgenes razonables en las cuatro variables (' +
+  return '📌 Análisis situacional (' + sit.etiqueta + '): partes con márgenes razonables en las cuatro variables (' +
     KPI_KEYS.map(k => KPI_LABELS_CORTOS[k] + ' ' + Math.round(kpisAntes[k]) + '%').join(', ') +
-    '). Con este punto de partida, la decisión debe juzgarse por su coherencia con el marco teórico del trimestre más que por la holgura puntual de un indicador.';
+    '). Juzga la decisión por su coherencia con el marco teórico del trimestre y por lo que deja para la próxima ronda. ' + recomendacion;
 }
 
 async function analizarConIA(decisionTexto, impactos, kpisAntes, kpisDespues, analisisLocal) {
@@ -1341,13 +1356,28 @@ async function analizarConIA(decisionTexto, impactos, kpisAntes, kpisDespues, an
 
 function h_actual() { return historial[historial.length - 1]; }
 
-function esOpcionOptima(d, i) {
+function situacionFinanciera(kpisActuales) {
+  const margenes = KPI_KEYS.map(k => kpisActuales[k] - UMBRAL_COLAPSO);
+  const min = Math.min.apply(null, margenes);
+  const medio = margenes.reduce((a, b) => a + b, 0) / margenes.length;
+  if (min <= 5) return { etiqueta: 'situación crítica: un mal trimestre te destituye', nivel: 'critica', min: min, medio: medio };
+  if (min <= 12) return { etiqueta: 'situación delicada: poco colchón en tu variable más débil', nivel: 'delicada', min: min, medio: medio };
+  if (min <= 20) return { etiqueta: 'situación ajustada: los errores se pagan caros', nivel: 'ajustada', min: min, medio: medio };
+  return { etiqueta: 'situación holgada: hay margen para apostar', nivel: 'holgada', min: min, medio: medio };
+}
+
+function esOpcionOptima(d, i, kpisActuales) {
   if (d.tipo !== 'eleccion') return false;
-  let mejor = 0, mejorPuntuacion = -99;
+  let mejor = 0, mejorPuntuacion = -Infinity;
   d.opciones.forEach((op, idx) => {
     const neto = KPI_KEYS.reduce((a, k) => a + op.impactos[k], 0);
-    const peor = Math.min.apply(null, KPI_KEYS.map(k => op.impactos[k]));
-    const puntuacion = neto - Math.max(0, -peor - 8) * 1.5;
+    let riesgo = 0;
+    KPI_KEYS.forEach(k => {
+      const resultante = (kpisActuales ? kpisActuales[k] : 50) + op.impactos[k];
+      if (resultante < UMBRAL_VIGILANCIA) riesgo += 6;
+      if (resultante <= UMBRAL_COLAPSO) riesgo += 25;
+    });
+    const puntuacion = neto - riesgo;
     if (puntuacion > mejorPuntuacion) { mejorPuntuacion = puntuacion; mejor = idx; }
   });
   return i === mejor;
@@ -1363,12 +1393,13 @@ function renderAnalisisModal(d, impactos, analisis) {
   '</div>';
   if (d.tipo === 'eleccion' && Array.isArray(d.opciones)) {
     const elegidaTxt = h_actual().eleccion;
-    html += '<div class="contraste-box"><h6>🔍 Y si hubieras decidido otra cosa…</h6>';
+    const situacion = situacionFinanciera(kpisAntes);
+    html += '<div class="contraste-box"><h6>🔍 Y si hubieras decidido otra cosa… <span style="color:#94a3b8;font-weight:400">(' + situacion.etiqueta + ')</span></h6>';
     d.opciones.forEach((op, i) => {
       const elegida = elegidaTxt.indexOf(op.texto.slice(0, 40)) !== -1;
-      const esOptima = esOpcionOptima(d, i);
+      const esOptima = esOpcionOptima(d, i, kpisAntes);
       html += '<div class="contraste-opt' + (esOptima ? ' optima' : '') + '">' +
-        '<div class="co-titulo">' + (elegida ? '➡️ <b>Elegida:</b> ' : '') + (esOptima && !elegida ? '⭐ <b>La más sólida con tu partida:</b> ' : '') + op.texto.slice(0, 110) + (op.texto.length > 110 ? '…' : '') + '</div>' +
+        '<div class="co-titulo">' + (elegida ? '➡️ <b>Elegida:</b> ' : '') + (esOptima && !elegida ? '⭐ <b>La más prudente con tu situación actual:</b> ' : '') + op.texto.slice(0, 110) + (op.texto.length > 110 ? '…' : '') + '</div>' +
         '<div class="impacts">' + KPI_KEYS.map(k => '<span class="impact ' + (op.impactos[k] >= 0 ? 'up' : 'down') + '">' + signo(op.impactos[k]) + ' ' + KPI_LABELS_CORTOS[k] + '</span>').join('') + '</div>' +
         '<div class="co-feedback">' + op.feedback + '</div>' +
       '</div>';
